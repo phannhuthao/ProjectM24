@@ -1,6 +1,6 @@
 // lấy danh sách sản phẩm về
 
-import { ProductType } from "../../interface";
+import { ProductType } from "../../confirg/interface";
 import { instance } from "../../service"
 
 export const getAllProduct = () => {

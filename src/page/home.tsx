@@ -7,14 +7,13 @@ import { Carousel } from 'antd';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 
-
 interface Product {
   id: string;
   name: string;
   image: string;
   price: string;
 }
-// chỗ lấy thông tin 
+
 const ProductList = ({ products, title }: { products: Product[], title: string }) => (
   <>
     <h1 style={{ textAlign: 'center' }}>{title}</h1>
@@ -22,15 +21,21 @@ const ProductList = ({ products, title }: { products: Product[], title: string }
       <div className="row">
         {products.map((product) => (
           <div key={product.id} className="col-md-3 mb-4">
-            <Link to={'/product'} style={{ textDecoration: 'none', color: 'inherit' }}>
+            <Link to={'/productdetail'} style={{ textDecoration: 'none', color: 'inherit' }}>
               <div className="card" style={{ cursor: 'pointer' }}>
                 <img src={product.image} className="card-img-top" alt={product.name} style={{ width: '100%', height: '400px', objectFit: 'cover' }} />
                 <div className="card-body">
                   <h5 className="card-title">{product.name}</h5>
                   <p className="card-text">Price: {product.price} VNĐ</p>
-                  <Button variant="outline-primary">Mua</Button>
-                  <Button variant="outline-primary"> <FontAwesomeIcon icon={faHeart} size="lg" /></Button>
-                  <Button variant="outline-primary"> <FontAwesomeIcon icon={faBagShopping} size="lg" /></Button>
+                  <div className="d-flex">
+                    <Button variant="outline-secondary" style={{ marginRight: '10px' }}>Mua</Button>
+                    <Button variant="outline-secondary" style={{ marginRight: '10px' }}>
+                      <FontAwesomeIcon icon={faBagShopping} size="lg" />
+                    </Button>
+                    <Button variant="outline-secondary">
+                      <FontAwesomeIcon icon={faHeart} size="lg" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </Link>
@@ -77,7 +82,7 @@ const HomePage = () => {
             <Nav className="me-auto my-2 my-lg-0 d-flex justify-content-between w-100" navbarScroll>
               <div className="d-flex">
                 <Nav.Link href="#" className="mx-2"><Link to={'/product'} style={{ textDecoration: 'none', color: 'black' }}>Product</Link></Nav.Link>
-                <Nav.Link href="#action2" className="mx-2"><Link to={'/formContact'} style={{ textDecoration: 'none', color: 'black'}}>From Contact</Link></Nav.Link>
+                <Nav.Link href="#action2" className="mx-2"><Link to={'/formContact'} style={{ textDecoration: 'none', color: 'black' }}>From Contact</Link></Nav.Link>
                 <NavDropdown title="Selection" id="navbarScrollingDropdown" className="mx-2">
                   <NavDropdown.Item href="#action3">Selection</NavDropdown.Item>
                   <NavDropdown.Item href="#action4">Another action</NavDropdown.Item>
@@ -135,11 +140,10 @@ const HomePage = () => {
         </div>
       </main>
 
-
       {/*Render sản phẩm theo loại samsung, iphone, oppo*/}
-      <ProductList products={products.filter(product => product.name.includes('Samsung'))} title="Samsung" />
-      <ProductList products={products.filter(product => product.name.includes('Iphone'))} title="Iphone" />
-      <ProductList products={products.filter(product => product.name.includes('OPPO'))} title="OPPO" />
+      <ProductList products={products.filter(product => product.name.includes('Samsung')).slice(0, 4)} title="Samsung" />
+      <ProductList products={products.filter(product => product.name.includes('Iphone')).slice(0, 4)} title="Iphone" />
+      <ProductList products={products.filter(product => product.name.includes('OPPO')).slice(0, 4)} title="OPPO" />
 
       <footer className="page-footer bg-dark text-white font-small blue pt-4 mt-auto">
         <div className="container-fluid text-center text-md-left">
@@ -173,17 +177,13 @@ const HomePage = () => {
               <ul className="list-unstyled">
                 <li><p>0862536828</p></li>
                 <li><p>EYYO@gmail.com</p></li>
-                <li><p>EYYO.IN</p></li>
               </ul>
             </div>
           </div>
         </div>
-
-        <div className="text-center py-3">
-          © 2024 Copyright:
-          <a href="https://mdbootstrap.com/"> MDBootstrap.com</a>
-        </div>
       </footer>
+
+
     </div>
   );
 };

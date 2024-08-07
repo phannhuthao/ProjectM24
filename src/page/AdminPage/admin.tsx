@@ -1,10 +1,10 @@
 import React from 'react';
 
 import { GetProp, Layout, Menu, MenuProps, theme } from 'antd';
-import { AppstoreOutlined, CalendarOutlined, CrownOutlined, HomeOutlined, ProductOutlined, UserOutlined } from '@ant-design/icons';
+import { AppstoreOutlined, HomeOutlined, ProductOutlined, UserOutlined } from '@ant-design/icons';
 import { Outlet, useNavigate } from 'react-router-dom';
 
-const { Header, Content, Footer, Sider } = Layout;
+const { Header, Content, Sider } = Layout;
 type MenuItem = GetProp<MenuProps, 'items'>[number];
 
 const items: MenuItem[] = [

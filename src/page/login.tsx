@@ -36,17 +36,17 @@ const Login = () => {
     e.preventDefault();
     formik.handleSubmit();
   }
-  useEffect(()=> {
-    // nếu quyền người dùng là admin thì điều hướng sang trang admin
-    // nếu là user thì điều hướng sang trang user
-    if(userLogin) {
-      //  true thì điều hướng sang trang admin
-      navigate("/admin")
-    }else {
-      // false thì điều hướng sang trang user
-      navigate("/")
-    }
-  }, [userLogin])
+  // useEffect(()=> {
+  //   // nếu quyền người dùng là admin thì điều hướng sang trang admin
+  //   // nếu là user thì điều hướng sang trang user
+  //   if(userLogin) {
+  //     //  true thì điều hướng sang trang admin
+  //     navigate("/admin")
+  //   }else {
+  //     // false thì điều hướng sang trang user
+  //     navigate("/")
+  //   }
+  // }, [userLogin])
   return (
     <Container className="login-container my-5">
       <Row className="justify-content-center">
