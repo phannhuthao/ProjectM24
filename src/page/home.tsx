@@ -97,7 +97,7 @@ const HomePage = () => {
                   className="me-2"
                   aria-label="Search"
                 />
-                <Button className='btn-sreach' variant="outline-primary">Search</Button>
+                <Button className='btn-sreach'  variant="outline-secondary">Search</Button>
               </Form>
 
               <Nav.Link href="#" className="d-flex align-items-center ms-3">

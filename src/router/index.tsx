@@ -12,10 +12,11 @@ import Products from '../page/AdminPage/Products'
 import DashBoard from '../page/AdminPage/DashBoard'
 import Category from '../page/AdminPage/category'
 import UserAccount from '../page/AdminPage/userAccount'
-import Admin from '../page/AdminPage/admin'
+// import Admin from '../page/AdminPage/admin'
 import Login from '../page/login'
 import Register from '../page/register'
-import User from '../page/uset'
+
+
 
 
 const Router = () => {
@@ -24,7 +25,7 @@ const Router = () => {
       {/*Đường dẫn user*/}
       <Route path='/home' element={<Home />} />
       <Route path='/login' element={<Login />} />
-      <Route path='/register' element={<Register />} />
+      <Route path='/register' element={<Register/>} />
       <Route path='/profile' element={<ProfileUser />} />
       <Route path='/cart' element={<Carts />} />
       <Route path='/heart' element={<Heart />} />
@@ -34,7 +35,7 @@ const Router = () => {
 
 
       {/* Đường dẫn admin*/}
-      <Route path='/admin' element={<Admin />}>
+      <Route path='/admin' element={<ProtectedRouter/>}>
         <Route index element={<DashBoard />} />
         <Route path='product' element={<Products />} />
         <Route path='category' element={<Category />} />

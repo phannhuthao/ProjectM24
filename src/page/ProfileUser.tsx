@@ -9,7 +9,7 @@ const ProfileUser = () => {
     <div className="d-flex flex-column min-vh-100">
       <Navbar expand="lg" className="bg-body-tertiary">
         <Container fluid>
-        <Navbar.Brand> <Link to={'/home'} style={{ textDecoration: 'none', color:'black'  }}>Ohayo</Link></Navbar.Brand>
+        <Navbar.Brand> <Link to={'/home'} style={{ textDecoration: 'none', color:'black'  }}>EYYO</Link></Navbar.Brand>
           <Navbar.Toggle aria-controls="navbarScroll" />
           <Navbar.Collapse id="navbarScroll">
             <Nav className="me-auto my-2 my-lg-0 d-flex justify-content-between w-100" navbarScroll>

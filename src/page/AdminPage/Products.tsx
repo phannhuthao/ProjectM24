@@ -1,10 +1,23 @@
-import React from 'react'
-import { Button, Table } from 'react-bootstrap'
+import { useEffect } from 'react'
+import { Button, Spinner, Table } from 'react-bootstrap'
 import { formatDate, formatUSD } from '../../confirg'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchAllProduct } from '../../store/slice/productSlice';
+import { RootState } from '../../store';
 
-const Products = () => {
+
+export default function Products()  {
+    const dispatch = useDispatch();
+    // lấy dữ liệu từ store
+
+    const { products, isLoading }= useSelector((state: RootState) => state.product);
+
+    useEffect(()=> {
+        dispatch(fetchAllProduct)
+    })
     return (
         <div>
+            {isLoading && <Spinner animation='border' variant='danger' />}
             <h1>Trang quản lí sản phẩm</h1>
             <Table striped bordered hover>
                 <thead>
@@ -18,18 +31,21 @@ const Products = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>Mark</td>
-                        <td><img src="" alt="" style={{width: "100", height: "100", objectFit: "cover"}}></img></td>
-                        <td>{formatUSD.format(2000)}</td>
+                    {
+                        products.map((p: any, index: any) =>
+                    <tr key={index}>
+                        <td>{index+1}</td>
+                        <td>{p.name}</td>
+                        <td><img src={p.image} alt={p.name} style={{width: "100", height: "100", objectFit: "cover"}}></img></td>
+                        <td>{formatUSD.format(p.price)}</td>
                         <td>
-                            {formatDate("2022-10-10")}
+                            {formatDate(p.createdAd)}
                         </td>
-                        <td><Button variant='warning'></Button></td>
-                        <td><Button variant='danger'></Button></td>
-
+                        <td><Button variant='warning'>Sửa</Button></td>
+                        <td><Button variant='danger'>Xóa</Button></td>
                     </tr>
+                         )
+                    }
                 
                 </tbody>
             </Table>
@@ -37,4 +53,4 @@ const Products = () => {
     )
 }
 
-export default Products
+

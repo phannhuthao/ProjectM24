@@ -2,11 +2,10 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { Button, Container, Form, Nav, Navbar, NavDropdown } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBagShopping, faHeart, faDoorClosed, faUser } from '@fortawesome/free-solid-svg-icons';
-import React, { useEffect, useState } from 'react';
-import { Carousel } from 'antd';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import ProductDetail from './productDetail';
+import { Pagination } from 'antd';
 
 interface Product {
     id: string;
@@ -15,6 +14,7 @@ interface Product {
     price: string;
 }
 
+// Render product list
 const ProductList = ({ products, title }: { products: Product[], title: string }) => (
     <>
         <h1 style={{ textAlign: 'center' }}>{title}</h1>
@@ -22,19 +22,21 @@ const ProductList = ({ products, title }: { products: Product[], title: string }
             <div className="row">
                 {products.map((product) => (
                     <div key={product.id} className="col-md-3 mb-4">
-                        <Link to={'/productdetail'} style={{ textDecoration: 'none', color: 'inherit' }}>
+                        <Link to={`/productdetail/${product.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                             <div className="card" style={{ cursor: 'pointer' }}>
                                 <img src={product.image} className="card-img-top" alt={product.name} style={{ width: '100%', height: '400px', objectFit: 'cover' }} />
                                 <div className="card-body">
                                     <h5 className="card-title">{product.name}</h5>
                                     <p className="card-text">Price: {product.price} VNĐ</p>
-                                    <Button variant="outline-primary">Mua</Button>
-                                    <Button variant="outline-primary">
-                                        <FontAwesomeIcon icon={faHeart} size="lg" />
-                                    </Button>
-                                    <Button variant="outline-primary">
-                                        <FontAwesomeIcon icon={faBagShopping} size="lg" />
-                                    </Button>
+                                    <div className="d-flex">
+                                        <Button variant="outline-secondary" style={{ marginRight: '10px' }}>Mua</Button>
+                                        <Button variant="outline-secondary" style={{ marginRight: '10px' }}>
+                                            <FontAwesomeIcon icon={faBagShopping} size="lg" />
+                                        </Button>
+                                        <Button variant="outline-secondary">
+                                            <FontAwesomeIcon icon={faHeart} size="lg" />
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
                         </Link>
@@ -47,6 +49,8 @@ const ProductList = ({ products, title }: { products: Product[], title: string }
 
 const Product = () => {
     const [products, setProducts] = useState<Product[]>([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 8;
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -60,6 +64,14 @@ const Product = () => {
 
         fetchProducts();
     }, []);
+
+    const indexOfLastProduct = currentPage * itemsPerPage;
+    const indexOfFirstProduct = indexOfLastProduct - itemsPerPage;
+    const currentProducts = products.slice(indexOfFirstProduct, indexOfLastProduct);
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+    };
 
     return (
         <>
@@ -123,7 +135,17 @@ const Product = () => {
                 </Container>
             </Navbar>
 
-            <ProductList products={products} title="All Products" />
+            <ProductList products={currentProducts} title="All Products" />
+
+            <Container className="d-flex justify-content-center my-4">
+                <Pagination
+                    current={currentPage}
+                    onChange={handlePageChange}
+                    total={products.length}
+                    pageSize={itemsPerPage}
+                    showSizeChanger={false}
+                />
+            </Container>
         </>
     );
 };
