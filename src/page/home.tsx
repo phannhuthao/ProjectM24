@@ -7,6 +7,14 @@ import { Carousel } from 'antd';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 
+// Định dạng tiền tệ Việt Nam
+export const formatVND = new Intl.NumberFormat('vi-VN', {
+  style: 'currency',
+  currency: 'VND',
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
+});
+
 interface Product {
   id: string;
   name: string;
@@ -26,7 +34,7 @@ const ProductList = ({ products, title }: { products: Product[], title: string }
                 <img src={product.image} className="card-img-top" alt={product.name} style={{ width: '100%', height: '400px', objectFit: 'cover' }} />
                 <div className="card-body">
                   <h5 className="card-title">{product.name}</h5>
-                  <p className="card-text">Price: {product.price} VNĐ</p>
+                  <p className="card-text">Price: {formatVND.format(Number(product.price))}</p>
                   <div className="d-flex">
                     <Button variant="outline-secondary" style={{ marginRight: '10px' }}>Mua</Button>
                     <Button variant="outline-secondary" style={{ marginRight: '10px' }}>
@@ -45,7 +53,6 @@ const ProductList = ({ products, title }: { products: Product[], title: string }
     </div>
   </>
 );
-
 
 const HomePage = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -96,8 +103,9 @@ const HomePage = () => {
                   placeholder="Search"
                   className="me-2"
                   aria-label="Search"
+                  // onChange={handlSreachProduct}
                 />
-                <Button className='btn-sreach'  variant="outline-secondary">Search</Button>
+                <Button className='btn-sreach' variant="outline-secondary">Search</Button>
               </Form>
 
               <Nav.Link href="#" className="d-flex align-items-center ms-3">
@@ -107,7 +115,6 @@ const HomePage = () => {
               <Nav.Link href="#" className="d-flex align-items-center ms-3">
                 <Link to={'/heart'}><FontAwesomeIcon icon={faHeart} size="lg" /></Link>
               </Nav.Link>
-
 
               <Nav.Link href="#" className="d-flex align-items-center ms-3">
                 <Link to={'/login'}><FontAwesomeIcon icon={faDoorClosed} size="lg" /></Link>
@@ -144,6 +151,7 @@ const HomePage = () => {
       <ProductList products={products.filter(product => product.name.includes('Samsung')).slice(0, 4)} title="Samsung" />
       <ProductList products={products.filter(product => product.name.includes('Iphone')).slice(0, 4)} title="Iphone" />
       <ProductList products={products.filter(product => product.name.includes('OPPO')).slice(0, 4)} title="OPPO" />
+      <ProductList products={products.slice(0, 4)} title="Sản phẩm bán chạy" />
 
       <footer className="page-footer bg-dark text-white font-small blue pt-4 mt-auto">
         <div className="container-fluid text-center text-md-left">
@@ -182,8 +190,6 @@ const HomePage = () => {
           </div>
         </div>
       </footer>
-
-
     </div>
   );
 };

@@ -5,8 +5,9 @@ export type UserType = {
     "fullName": string,
     "phone": string,
     "birthday": string,
+    "status": boolean,
     "id": number,
-    "role": boolean
+    "role": string
 }
 
 export type ProductType = {

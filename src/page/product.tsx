@@ -7,6 +7,14 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { Pagination } from 'antd';
 
+export const formatVND = new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+  
+
 interface Product {
     id: string;
     name: string;
@@ -17,35 +25,36 @@ interface Product {
 // Render product list
 const ProductList = ({ products, title }: { products: Product[], title: string }) => (
     <>
-        <h1 style={{ textAlign: 'center' }}>{title}</h1>
-        <div className="renderInformationProduct container my-4">
-            <div className="row">
-                {products.map((product) => (
-                    <div key={product.id} className="col-md-3 mb-4">
-                        <Link to={`/productdetail/${product.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                            <div className="card" style={{ cursor: 'pointer' }}>
-                                <img src={product.image} className="card-img-top" alt={product.name} style={{ width: '100%', height: '400px', objectFit: 'cover' }} />
-                                <div className="card-body">
-                                    <h5 className="card-title">{product.name}</h5>
-                                    <p className="card-text">Price: {product.price} VNĐ</p>
-                                    <div className="d-flex">
-                                        <Button variant="outline-secondary" style={{ marginRight: '10px' }}>Mua</Button>
-                                        <Button variant="outline-secondary" style={{ marginRight: '10px' }}>
-                                            <FontAwesomeIcon icon={faBagShopping} size="lg" />
-                                        </Button>
-                                        <Button variant="outline-secondary">
-                                            <FontAwesomeIcon icon={faHeart} size="lg" />
-                                        </Button>
-                                    </div>
-                                </div>
-                            </div>
-                        </Link>
+      <h1 style={{ textAlign: 'center' }}>{title}</h1>
+      <div className="renderInformationProduct container my-4">
+        <div className="row">
+          {products.map((product) => (
+            <div key={product.id} className="col-md-3 mb-4">
+              <Link to={'/productdetail'} style={{ textDecoration: 'none', color: 'inherit' }}>
+                <div className="card" style={{ cursor: 'pointer' }}>
+                  <img src={product.image} className="card-img-top" alt={product.name} style={{ width: '100%', height: '400px', objectFit: 'cover' }} />
+                  <div className="card-body">
+                    <h5 className="card-title">{product.name}</h5>
+                    <p className="card-text">Price: {formatVND.format(Number(product.price))}</p>
+                    <div className="d-flex">
+                      <Button variant="outline-secondary" style={{ marginRight: '10px' }}>Mua</Button>
+                      <Button variant="outline-secondary" style={{ marginRight: '10px' }}>
+                        <FontAwesomeIcon icon={faBagShopping} size="lg" />
+                      </Button>
+                      <Button variant="outline-secondary">
+                        <FontAwesomeIcon icon={faHeart} size="lg" />
+                      </Button>
                     </div>
-                ))}
+                  </div>
+                </div>
+              </Link>
             </div>
+          ))}
         </div>
+      </div>
     </>
-);
+  );
+  
 
 const Product = () => {
     const [products, setProducts] = useState<Product[]>([]);

@@ -10,11 +10,11 @@ import FormContact from '../page/fromContact'
 import ProductDetails from '../page/productDetail'
 import Products from '../page/AdminPage/Products'
 import DashBoard from '../page/AdminPage/DashBoard'
-import Category from '../page/AdminPage/category'
 import UserAccount from '../page/AdminPage/userAccount'
 // import Admin from '../page/AdminPage/admin'
 import Login from '../page/login'
 import Register from '../page/register'
+import CategoryManager from '../page/AdminPage/CategoryManager'
 
 
 
@@ -36,9 +36,9 @@ const Router = () => {
 
       {/* Đường dẫn admin*/}
       <Route path='/admin' element={<ProtectedRouter/>}>
+      <Route path="category" element={<CategoryManager />} />
         <Route index element={<DashBoard />} />
         <Route path='product' element={<Products />} />
-        <Route path='category' element={<Category />} />
         <Route path='useraccount' element={<UserAccount />} />
       </Route>
 
