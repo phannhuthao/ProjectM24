@@ -22,7 +22,7 @@ interface Product {
     price: string;
 }
 
-// Render product list
+// render danh sách sản phẩm
 const ProductList = ({ products, title }: { products: Product[], title: string }) => (
     <>
       <h1 style={{ textAlign: 'center' }}>{title}</h1>
@@ -30,31 +30,35 @@ const ProductList = ({ products, title }: { products: Product[], title: string }
         <div className="row">
           {products.map((product) => (
             <div key={product.id} className="col-md-3 mb-4">
-              <Link to={'/productdetail'} style={{ textDecoration: 'none', color: 'inherit' }}>
-                <div className="card" style={{ cursor: 'pointer' }}>
-                  <img src={product.image} className="card-img-top" alt={product.name} style={{ width: '100%', height: '400px', objectFit: 'cover' }} />
-                  <div className="card-body">
-                    <h5 className="card-title">{product.name}</h5>
-                    <p className="card-text">Price: {formatVND.format(Number(product.price))}</p>
-                    <div className="d-flex">
-                      <Button variant="outline-secondary" style={{ marginRight: '10px' }}>Mua</Button>
-                      <Button variant="outline-secondary" style={{ marginRight: '10px' }}>
-                        <FontAwesomeIcon icon={faBagShopping} size="lg" />
-                      </Button>
-                      <Button variant="outline-secondary">
-                        <FontAwesomeIcon icon={faHeart} size="lg" />
-                      </Button>
-                    </div>
-                  </div>
+              <div className="card" style={{ cursor: 'pointer' }}>
+                <img src={product.image} className="card-img-top" alt={product.name} style={{ width: '100%', height: '400px', objectFit: 'cover' }} />
+                <div className="card-body">
+                  <h5 className="card-title">{product.name}</h5>
+                  <p className="card-text">Price: {formatVND.format(Number(product.price))}</p>
+                  <Button variant="outline-secondary" style={{ marginRight: '10px'}}>Buy</Button>
+                  <Button variant="outline-secondary" style={{ marginRight: '10px'}} onClick={() => addToCart(product)}>Add to Cart</Button>
+                  <Button variant="outline-secondary" style={{ marginRight: '10px' }}>
+                      <FontAwesomeIcon icon={faHeart} size="lg" />
+                 </Button>
                 </div>
-              </Link>
+              </div>
             </div>
           ))}
         </div>
       </div>
     </>
   );
-  
+
+  const addToCart = (product: Product) => {
+    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const existingProductIndex = cart.findIndex((item: Product) => item.id === product.id);
+    if (existingProductIndex >= 0) {
+      cart[existingProductIndex].quantity += 1;
+    } else {
+      cart.push({ ...product, quantity: 1 });
+    }
+    localStorage.setItem('cart', JSON.stringify(cart));
+  };
 
 const Product = () => {
     const [products, setProducts] = useState<Product[]>([]);

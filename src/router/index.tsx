@@ -3,7 +3,7 @@ import Home from '../page/home'
 import NotFound from '../page/notFound'
 import ProfileUser from '../page/ProfileUser'
 import Carts from '../page/cart'
-import Heart from '../page/heart'
+import Heart from '../page/wishlist'
 import ProtectedRouter from '../page/AdminPage/protectedRouter'
 import Product from '../page/product'
 import FormContact from '../page/fromContact'
@@ -11,7 +11,6 @@ import ProductDetails from '../page/productDetail'
 import Products from '../page/AdminPage/Products'
 import DashBoard from '../page/AdminPage/DashBoard'
 import UserAccount from '../page/AdminPage/userAccount'
-// import Admin from '../page/AdminPage/admin'
 import Login from '../page/login'
 import Register from '../page/register'
 import CategoryManager from '../page/AdminPage/CategoryManager'
@@ -22,7 +21,7 @@ import CategoryManager from '../page/AdminPage/CategoryManager'
 const Router = () => {
   return (
     <Routes>
-      {/*Đường dẫn user*/}
+      
       <Route path='/home' element={<Home />} />
       <Route path='/login' element={<Login />} />
       <Route path='/register' element={<Register/>} />
@@ -33,13 +32,26 @@ const Router = () => {
       <Route path='/productdetail' element={<ProductDetails />} />
       <Route path='/formContact' element={<FormContact />} />
 
+      {/*Đường dẫn user*/}
+      {/* <Route path='/home' element={<Home />}>
+      <Route index element={<Product/>} />
+      <Route path='productdetail' element={<ProductDetails />} />
+      <Route path='formContact' element={<FormContact />} />
+      <Route path='profile' element={<ProfileUser />} />
+      <Route path='cart' element={<Carts />} />
+      <Route path='heart' element={<Heart />} />
+      </Route> */}
 
+      {/*Đường dẫn đăng nhập , đăng kí*/}
+      <Route path='/login' element={<Login />} />
+      <Route path='/register' element={<Register/>} />
+      
       {/* Đường dẫn admin*/}
       <Route path='/admin' element={<ProtectedRouter/>}>
-      <Route path="category" element={<CategoryManager />} />
-        <Route index element={<DashBoard />} />
+        <Route path="category" element={<CategoryManager/>}/>
+        <Route index element={<DashBoard />}/>
         <Route path='product' element={<Products />} />
-        <Route path='useraccount' element={<UserAccount />} />
+        <Route path='useraccount' element={<UserAccount />}/>
       </Route>
 
       {/*Đường dẫn lỗi*/}

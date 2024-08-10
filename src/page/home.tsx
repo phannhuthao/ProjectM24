@@ -1,5 +1,5 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Button, Container, Form, Nav, Navbar, NavDropdown } from 'react-bootstrap';
+import { Button, Container, Form, Navbar, Nav, NavDropdown } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBagShopping, faHeart, faDoorClosed, faUser } from '@fortawesome/free-solid-svg-icons';
 import React, { useEffect, useState } from 'react';
@@ -22,38 +22,6 @@ interface Product {
   price: string;
 }
 
-const ProductList = ({ products, title }: { products: Product[], title: string }) => (
-  <>
-    <h1 style={{ textAlign: 'center' }}>{title}</h1>
-    <div className="renderInformationProduct container my-4">
-      <div className="row">
-        {products.map((product) => (
-          <div key={product.id} className="col-md-3 mb-4">
-            <Link to={'/productdetail'} style={{ textDecoration: 'none', color: 'inherit' }}>
-              <div className="card" style={{ cursor: 'pointer' }}>
-                <img src={product.image} className="card-img-top" alt={product.name} style={{ width: '100%', height: '400px', objectFit: 'cover' }} />
-                <div className="card-body">
-                  <h5 className="card-title">{product.name}</h5>
-                  <p className="card-text">Price: {formatVND.format(Number(product.price))}</p>
-                  <div className="d-flex">
-                    <Button variant="outline-secondary" style={{ marginRight: '10px' }}>Mua</Button>
-                    <Button variant="outline-secondary" style={{ marginRight: '10px' }}>
-                      <FontAwesomeIcon icon={faBagShopping} size="lg" />
-                    </Button>
-                    <Button variant="outline-secondary">
-                      <FontAwesomeIcon icon={faHeart} size="lg" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </Link>
-          </div>
-        ))}
-      </div>
-    </div>
-  </>
-);
-
 const HomePage = () => {
   const [products, setProducts] = useState<Product[]>([]);
 
@@ -69,6 +37,55 @@ const HomePage = () => {
     fetchProducts();
   }, []);
 
+  const ProductList = ({ products, title }: { products: Product[], title: string }) => (
+    <>
+      <h1 style={{ textAlign: 'center' }}>{title}</h1>
+      <div className="renderInformationProduct container my-4">
+        <div className="row">
+          {products.map((product) => (
+            <div key={product.id} className="col-md-3 mb-4">
+              <div className="card" style={{ cursor: 'pointer' }}>
+                <img src={product.image} className="card-img-top" alt={product.name} style={{ width: '100%', height: '400px', objectFit: 'cover' }} />
+                <div className="card-body">
+                  <h5 className="card-title">{product.name}</h5>
+                  <p className="card-text">Price: {formatVND.format(Number(product.price))}</p>
+                  <Button variant="outline-secondary" style={{ marginRight: '10px'}}>Buy</Button>
+                  <Button variant="outline-secondary" style={{ marginRight: '10px'}} onClick={() => addToCart(product)}>Add to Cart</Button>
+                  <Button variant="outline-secondary" style={{ marginRight: '10px' }} onClick={() => addToWishlist(product)}>
+                      <FontAwesomeIcon icon={faHeart} size="lg" />
+                 </Button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+
+  const addToCart = (product: Product) => {
+    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const existingProductIndex = cart.findIndex((item: Product) => item.id === product.id);
+    if (existingProductIndex >= 0) {
+      cart[existingProductIndex].quantity += 1;
+    } else {
+      cart.push({ ...product, quantity: 1 });
+    }
+    localStorage.setItem('cart', JSON.stringify(cart));
+  };
+
+  const addToWishlist = (product: Product) => {
+    let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+    const existingProductIndex = wishlist.findIndex((item: Product) => item.id === product.id);
+  
+    if (existingProductIndex === -1) {
+      wishlist.push(product); 
+    }
+  
+    localStorage.setItem('wishlist', JSON.stringify(wishlist));
+  };
+  
+
   const contentStyle: React.CSSProperties = {
     height: '380px',
     color: '#fff',
@@ -83,16 +100,22 @@ const HomePage = () => {
     <div className="d-flex flex-column min-vh-100">
       <Navbar expand="lg" className="bg-body-tertiary">
         <Container fluid>
-          <Navbar.Brand> <Link to={'/home'} style={{ textDecoration: 'none', color: 'black' }}>EYYO</Link></Navbar.Brand>
+          <Navbar.Brand>
+            <Link to={'/home'} style={{ textDecoration: 'none', color: 'black' }}>EYYO</Link>
+          </Navbar.Brand>
           <Navbar.Toggle aria-controls="navbarScroll" />
           <Navbar.Collapse id="navbarScroll">
             <Nav className="me-auto my-2 my-lg-0 d-flex justify-content-between w-100" navbarScroll>
               <div className="d-flex">
-                <Nav.Link href="#" className="mx-2"><Link to={'/product'} style={{ textDecoration: 'none', color: 'black' }}>Product</Link></Nav.Link>
-                <Nav.Link href="#action2" className="mx-2"><Link to={'/formContact'} style={{ textDecoration: 'none', color: 'black' }}>From Contact</Link></Nav.Link>
+                <Nav.Link href="#" className="mx-2">
+                  <Link to={'/product'} style={{ textDecoration: 'none', color: 'black' }}>Product</Link>
+                </Nav.Link>
+                <Nav.Link href="#action2" className="mx-2">
+                  <Link to={'/formContact'} style={{ textDecoration: 'none', color: 'black' }}>From Contact</Link>
+                </Nav.Link>
                 <NavDropdown title="Selection" id="navbarScrollingDropdown" className="mx-2">
                   <NavDropdown.Item href="#action3">Selection</NavDropdown.Item>
-                  <NavDropdown.Item href="#action4">Another action</NavDropdown.Item>
+                  <NavDropdown.Item href="#action4">Action</NavDropdown.Item>
                   <NavDropdown.Divider />
                   <NavDropdown.Item href="#action5">Something else here</NavDropdown.Item>
                 </NavDropdown>
@@ -103,7 +126,6 @@ const HomePage = () => {
                   placeholder="Search"
                   className="me-2"
                   aria-label="Search"
-                  // onChange={handlSreachProduct}
                 />
                 <Button className='btn-sreach' variant="outline-secondary">Search</Button>
               </Form>
@@ -147,7 +169,6 @@ const HomePage = () => {
         </div>
       </main>
 
-      {/*Render sản phẩm theo loại samsung, iphone, oppo*/}
       <ProductList products={products.filter(product => product.name.includes('Samsung')).slice(0, 4)} title="Samsung" />
       <ProductList products={products.filter(product => product.name.includes('Iphone')).slice(0, 4)} title="Iphone" />
       <ProductList products={products.filter(product => product.name.includes('OPPO')).slice(0, 4)} title="OPPO" />
@@ -193,5 +214,7 @@ const HomePage = () => {
     </div>
   );
 };
+
+
 
 export default HomePage;

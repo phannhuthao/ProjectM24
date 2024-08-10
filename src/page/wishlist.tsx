@@ -5,15 +5,15 @@ import { faBagShopping, faHeart, faDoorClosed, faUser } from '@fortawesome/free-
 import React from 'react';
 import { Link } from 'react-router-dom';
 
+
 interface Product {
   id: string;
   name: string;
   image: string;
   price: string;
-  quantity: number;
 }
 
-
+// hàm định dạng tiền tệ VNĐ
 export const formatVND = new Intl.NumberFormat('vi-VN', {
   style: 'currency',
   currency: 'VND',
@@ -21,36 +21,25 @@ export const formatVND = new Intl.NumberFormat('vi-VN', {
   maximumFractionDigits: 0,
 });
 
-
-const Carts = () => {
-  const [cart, setCart] = React.useState<Product[]>([]);
+const Wishlist = () => {
+  const [wishlist, setWishList] = React.useState<Product[]>([]);
 
   React.useEffect(() => {
-    const storedCart = JSON.parse(localStorage.getItem('cart') || '[]');
-    setCart(storedCart);
+    const storedWishList = JSON.parse(localStorage.getItem('wishlist') || '[]');
+    setWishList(storedWishList);
   }, []);
 
-  const handleQuantityChange = (id: string, delta: number) => {
-    setCart((prevCart) => {
-      const updatedCart = prevCart.map((product) => 
-        product.id === id ? { ...product, quantity: Math.max(1, product.quantity + delta) } : product
-      );
-      localStorage.setItem('cart', JSON.stringify(updatedCart));
-      return updatedCart;
-    });
-  };
-
   const handleDeleteOneProduct = (id: string) => {
-    setCart((prevCart) => {
-      const updatedCart = prevCart.filter((product) => product.id !== id);
-      localStorage.setItem('cart', JSON.stringify(updatedCart));
-      return updatedCart;
+    setWishList((prevWishList) => {
+      const updatedWishList = prevWishList.filter((product) => product.id !== id);
+      localStorage.setItem('wishlist', JSON.stringify(updatedWishList));
+      return updatedWishList;
     });
   };
 
   const handleDeleteAll = () => {
-    setCart([]);
-    localStorage.removeItem('cart');
+    setWishList([]);
+    localStorage.removeItem('wishlist');
   };
 
   return (
@@ -103,29 +92,30 @@ const Carts = () => {
 
       <Container className="my-4">
         <Button variant="outline-secondary" onClick={handleDeleteAll}>Delete All</Button>
-        <h1>Giỏ hàng</h1>
+        <h1>Yêu thích</h1>
         <div className="row">
-          {cart.map((item) => (
-            <div key={item.id} className="col-md-3 mb-4">
-              <div className="card">
-                <img src={item.image} className="card-img-top" alt={item.name} style={{ width: '100%', height: '400px', objectFit: 'cover' }} />
-                <div className="card-body">
-                  <h5 className="card-title">{item.name}</h5>
-                  <p className="card-text">Price: {formatVND.format(Number(item.price))}</p>
-                  <div className="d-flex align-items-center">
-                    <Button variant="outline-secondary" style={{marginRight: '10px'}} onClick={() => handleQuantityChange(item.id, -1)}>-</Button>
-                    <span className="mx-2">{item.quantity}</span>
-                    <Button variant="outline-secondary" style={{marginRight: '10px'}} onClick={() => handleQuantityChange(item.id, 1)}>+</Button>
-                    <Button variant="outline-secondary" style={{marginRight: '30px'}} onClick={() => handleDeleteOneProduct(item.id)}>Delete</Button>
+          {wishlist.length === 0 ? (
+            <p>No items in wishlist</p>
+          ) : (
+            wishlist.map((item) => (
+              <div key={item.id} className="col-md-3 mb-4">
+                <div className="card">
+                  <img src={item.image} className="card-img-top" alt={item.name} style={{ width: '100%', height: '400px', objectFit: 'cover' }} />
+                  <div className="card-body">
+                    <h5 className="card-title">{item.name}</h5>
+                    <p className="card-text">Price:{formatVND.format(Number(item.price))}</p>
+                    <div className="d-flex align-items-center">
+                      <Button variant="outline-secondary" style={{ marginRight: '30px' }} onClick={() => handleDeleteOneProduct(item.id)}>Delete</Button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </Container>
     </div>
   );
 };
 
-export default Carts;
+export default Wishlist;

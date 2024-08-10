@@ -1,15 +1,32 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Container, Form, Nav, Navbar, NavDropdown } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBagShopping, faHeart, faDoorClosed, faUser, faHome, faInfoCircle, faContactCard } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
 
+interface User {
+  name: string;
+  email: string;
+  password: string;
+  phone: string;
+  birthday: string;
+}
+
 const ProfileUser = () => {
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('users');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
   return (
     <div className="d-flex flex-column min-vh-100">
       <Navbar expand="lg" className="bg-body-tertiary">
         <Container fluid>
-        <Navbar.Brand> <Link to={'/home'} style={{ textDecoration: 'none', color:'black'  }}>EYYO</Link></Navbar.Brand>
+          <Navbar.Brand><Link to={'/home'} style={{ textDecoration: 'none', color:'black'  }}>Ohayo</Link></Navbar.Brand>
           <Navbar.Toggle aria-controls="navbarScroll" />
           <Navbar.Collapse id="navbarScroll">
             <Nav className="me-auto my-2 my-lg-0 d-flex justify-content-between w-100" navbarScroll>
@@ -72,8 +89,19 @@ const ProfileUser = () => {
           </ul>
         </div>
 
-        {/* Main Content */}
-        <div className="flex-grow-1 d-flex flex-column">
+        <div className="flex-grow-1 d-flex flex-column p-4">
+          <h2>User Profile</h2>
+          {user ? (
+            <div>
+              <p>Name:{user.name}</p>
+              <p>Email: {user.email}</p>
+              <p>Password: {user.password}</p>
+              <p>Phone: {user.phone}</p>
+              <p>Birthday:{user.birthday}</p>
+            </div>
+          ) : (
+            <p>No user information found.</p>
+          )}
         </div>
       </div>
     </div>
