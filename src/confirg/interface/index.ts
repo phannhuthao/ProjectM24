@@ -17,6 +17,5 @@ export type ProductType = {
     description: string,
     image: string,
     quantity: number,
-    click: number,
     createAd: string
 }

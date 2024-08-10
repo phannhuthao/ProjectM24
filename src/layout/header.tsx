@@ -1,7 +1,7 @@
 import React from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Button, Container, Form, Nav, Navbar, NavDropdown } from "react-bootstrap";
-import HomeProduct from "../page/product";
+import HomeProduct from "../page/UserPage/product";
 // import { Incognito } from 'bootstrap-icons-react';
 
 

@@ -20,6 +20,12 @@ export const editProduct : any = createAsyncThunk('products/edit', async (produc
     return response.data;
 });
 
+export const addProduct: any = createAsyncThunk('products/addProduct',async (product: ProductType) => {
+        const response = await instance.post('/products', product);
+        return response.data;
+    }
+);
+
 
 const init: ProductType[] = [];
 
@@ -70,6 +76,17 @@ const productSlice = createSlice({
                 state.isLoading = false;
                 state.error = action.error.message || "An error occurred while updating the product.";
             })
+            // thêm
+            .addCase(addProduct.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(addProduct.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.products.push(action.payload);
+            })
+            .addCase(addProduct.rejected, (state) => {
+                state.isLoading = false;
+            });
     }
 });
 

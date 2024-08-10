@@ -1,17 +1,24 @@
 import React, { useState } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
-import { ProductType } from '../../confirg/interface';
 import { useDispatch } from 'react-redux';
-import { editProduct } from '../../store/slice/productSlice';
+import { addProduct } from '../../store/slice/productSlice';
+import { ProductType } from '../../confirg/interface';
 
-interface EditProductModalProps {
+interface AddProductModalProps {
     show: boolean;
     onHide: () => void;
-    product: ProductType;
 }
 
-const EditProductModal: React.FC<EditProductModalProps> = ({ show, onHide, product }) => {
-    const [formData, setFormData] = useState<ProductType>(product);
+const AddProductModal: React.FC<AddProductModalProps> = ({ show, onHide }) => {
+    const [formData, setFormData] = useState<ProductType>({
+        id: 0, 
+        name: '',
+        image: '',
+        description: "",
+        price: 0,
+        quantity: 0,
+        createAd: "",
+    });
     const dispatch = useDispatch();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -21,14 +28,14 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ show, onHide, produ
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        dispatch(editProduct(formData));
+        dispatch(addProduct(formData));
         onHide(); // Close the modal after submission
     };
 
     return (
         <Modal show={show} onHide={onHide}>
             <Modal.Header closeButton>
-                <Modal.Title>Edit Product</Modal.Title>
+                <Modal.Title>Add Product</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <Form onSubmit={handleSubmit}>
@@ -39,6 +46,7 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ show, onHide, produ
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
+                            required
                         />
                     </Form.Group>
 
@@ -49,6 +57,7 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ show, onHide, produ
                             name="price"
                             value={formData.price}
                             onChange={handleChange}
+                            required
                         />
                     </Form.Group>
 
@@ -56,9 +65,10 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ show, onHide, produ
                         <Form.Label>Quantity</Form.Label>
                         <Form.Control
                             type="number"
-                            name="quantity" // Update the name to match the formData field
+                            name="quantity"
                             value={formData.quantity}
                             onChange={handleChange}
+                            required
                         />
                     </Form.Group>
 
@@ -69,10 +79,11 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ show, onHide, produ
                             name="image"
                             value={formData.image}
                             onChange={handleChange}
+                            required
                         />
                     </Form.Group>
                     <Button variant="primary" type="submit">
-                        Save Changes
+                        Add Product
                     </Button>
                 </Form>
             </Modal.Body>
@@ -80,4 +91,4 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ show, onHide, produ
     );
 };
 
-export default EditProductModal;
+export default AddProductModal;

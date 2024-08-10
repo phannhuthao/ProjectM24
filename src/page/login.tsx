@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Form, Button, Container, Row, Col } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Link, useNavigate } from "react-router-dom";
@@ -17,6 +17,8 @@ const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const userLogin = useSelector((state: RootState) => state.user.userLogin);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
 
   const adminCredentials: AccountAdmin = {
     email: "admin@gmail.com",
@@ -37,25 +39,25 @@ const Login = () => {
     }),
     onSubmit: async (values) => {
       console.log("Submitting values:", values); // Kiểm tra giá trị khi gửi
-
+    
       if (values.email === adminCredentials.email && values.password === adminCredentials.password) {
-       localStorage.setItem('role', "ADMIN");
-       
+        localStorage.setItem('role', "ADMIN");
+        
         // dispatch(loginUser(adminCredentials));
         // localStorage.setItem("adminLogin", JSON.stringify(adminCredentials)); 
         navigate("/admin"); 
       } else {
         const storedUsers = JSON.parse(localStorage.getItem("users") || "[]");
         const user = storedUsers.find((user: any) => user.email === values.email && user.password === values.password);
-
+    
         if (user) {
           dispatch(loginUser(user));
           navigate("/home"); 
         } else {
-          alert("Email hoặc mật khẩu không chính xác");
+          setErrorMessage("TÀI KHOẢN NÀY CHƯA ĐƯỢC ĐĂNG KÍ HOẶC KHÔNG TỒN TẠI");
         }
       }
-    }
+    }    
   });
 
   useEffect(() => {
@@ -75,6 +77,13 @@ const Login = () => {
         <Col md={6} lg={4}>
           <Form onSubmit={onSubmitForm} className="login-form p-4 rounded">
             <h2 className="text-center mb-4">Login</h2>
+            
+            {errorMessage && (
+              <div className="alert alert-danger" role="alert">
+                {errorMessage}
+              </div>
+            )}
+  
             <Form.Group controlId="formUsername">
               <Form.Label>Email</Form.Label>
               <Form.Control
@@ -89,7 +98,7 @@ const Login = () => {
                 {formik.errors.email}
               </Form.Control.Feedback>
             </Form.Group>
-
+  
             <Form.Group controlId="formPassword" className="mt-3">
               <Form.Label>Password</Form.Label>
               <Form.Control
@@ -104,7 +113,7 @@ const Login = () => {
                 {formik.errors.password}
               </Form.Control.Feedback>
             </Form.Group>
-
+  
             <Button variant="primary" type="submit" className="w-100 mt-4">
               Login
             </Button>
@@ -113,6 +122,6 @@ const Login = () => {
         </Col>
       </Row>
     </Container>
-  );
+  );  
 };
 export default Login;

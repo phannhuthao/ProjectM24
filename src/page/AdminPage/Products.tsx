@@ -1,20 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Spinner, Table } from 'react-bootstrap';
-import { formatDate, formatVND } from '../../confirg';
+import { formatVND } from '../../confirg';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAllProduct, deleteProduct } from '../../store/slice/productSlice';
 import { RootState } from '../../store';
 import EditProductModal from '../../page/AdminPage/EditProductModal';
+import AddProductModal from '../AdminPage/AddToProduct';
 import { ProductType } from '../../confirg/interface';
 
 export default function Products() {
     const dispatch = useDispatch();
     const { products, isLoading } = useSelector((state: RootState) => state.product);
     const [selectedProduct, setSelectedProduct] = useState<ProductType | null>(null);
-    const [showModal, setShowModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [showAddModal, setShowAddModal] = useState(false);
 
     useEffect(() => {
-        dispatch(fetchAllProduct()); // Gọi hàm lấy tất cả sản phẩm
+        dispatch(fetchAllProduct());
     }, [dispatch]);
 
     const handleDelete = (productId: number) => {
@@ -23,12 +25,16 @@ export default function Products() {
 
     const handleEditClick = (product: ProductType) => {
         setSelectedProduct(product);
-        setShowModal(true);
+        setShowEditModal(true);
     };
 
-    const handleCloseModal = () => {
-        setShowModal(false);
+    const handleCloseEditModal = () => {
+        setShowEditModal(false);
         setSelectedProduct(null);
+    };
+
+    const handleCloseAddModal = () => {
+        setShowAddModal(false);
     };
 
     return (
@@ -37,7 +43,7 @@ export default function Products() {
             <h1>Trang quản lí sản phẩm</h1>
             
             <div className="d-flex justify-content-end align-items-center mb-3">
-                <Button variant="primary" className="me-2">Add Product</Button>
+                <Button variant="primary" className="me-2" onClick={() => setShowAddModal(true)}>Add Product</Button>
             </div>
           
             <Table striped bordered hover>
@@ -47,7 +53,7 @@ export default function Products() {
                         <th>Name</th>
                         <th>Image</th>
                         <th>Price</th>
-                        {/* <th>Created At</th> */}
+                        <th>Quantity</th>
                         <th colSpan={2}>Action</th>
                     </tr>
                 </thead>
@@ -60,7 +66,7 @@ export default function Products() {
                                 <img src={p.image} alt={p.name} style={{ width: "50px", height: "50px", objectFit: "cover" }} />
                             </td>
                             <td>{formatVND.format(p.price)}</td>
-                            {/* <td>{formatDate(p.createAd)}</td> */}
+                            <td>{p.quantity}</td>
                             <td>
                                 <Button variant='warning' onClick={() => handleEditClick(p)}>Sửa</Button>
                             </td>
@@ -74,11 +80,16 @@ export default function Products() {
 
             {selectedProduct && (
                 <EditProductModal
-                    show={showModal}
-                    onHide={handleCloseModal}
+                    show={showEditModal}
+                    onHide={handleCloseEditModal}
                     product={selectedProduct}
                 />
             )}
+
+            <AddProductModal
+                show={showAddModal}
+                onHide={handleCloseAddModal}
+            />
         </div>
     );
 }
