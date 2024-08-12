@@ -20,6 +20,7 @@ interface Product {
   name: string;
   image: string;
   price: string;
+  quantity: number;
 }
 
 const HomePage = () => {
@@ -48,7 +49,7 @@ const HomePage = () => {
     }
   };
 
-  
+
 
   const ProductList = ({ products, title }: { products: Product[], title: string }) => (
     <>
@@ -64,11 +65,11 @@ const HomePage = () => {
                 <div className="card-body">
                   <h5 className="card-title">{product.name}</h5>
                   <p className="card-text">Price: {formatVND.format(Number(product.price))}</p>
-                  <Button variant="outline-secondary" style={{ marginRight: '10px'}}>Buy</Button>
-                  <Button variant="outline-secondary" style={{ marginRight: '10px'}} onClick={() => addToCart(product)}>Add to Cart</Button>
+                  <Button variant="outline-secondary" style={{ marginRight: '10px' }} onClick={()=> addToBuy(product)}>Buy</Button>
+                  <Button variant="outline-secondary" style={{ marginRight: '10px' }} onClick={() => addToCart(product)}>Add to Cart</Button>
                   <Button variant="outline-secondary" style={{ marginRight: '10px' }} onClick={() => addToWishlist(product)}>
-                      <FontAwesomeIcon icon={faHeart} size="lg" />
-                 </Button>
+                    <FontAwesomeIcon icon={faHeart} size="lg" />
+                  </Button>
                 </div>
               </div>
             </div>
@@ -89,20 +90,28 @@ const HomePage = () => {
     localStorage.setItem('cart', JSON.stringify(cart));
     alert('Sản phẩm đã được thêm vào giỏ hàng');
   };
-  
+
 
   const addToWishlist = (product: Product) => {
     let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
     const existingProductIndex = wishlist.findIndex((item: Product) => item.id === product.id);
-  
+
     if (existingProductIndex === -1) {
       wishlist.push(product);
     }
-  
+
     localStorage.setItem('wishlist', JSON.stringify(wishlist));
     alert('Sản phẩm đã được thêm vào phần yêu thích');
   };
+
+  const addToBuy = (product: Product) => {
+    const buy = { ...product, totalPrice: product.quantity * Number(product.price) };
+    localStorage.setItem('productBuy', JSON.stringify(buy));
+    window.location.href = '/buy'; // Navigate to buy page
+  };
   
+
+
 
   const contentStyle: React.CSSProperties = {
     height: '380px',
@@ -148,64 +157,76 @@ const HomePage = () => {
                 <Button className='btn-sreach' variant="outline-secondary">Search</Button>
               </Form>
 
-              <Nav.Link href="#" className="d-flex align-items-center ms-3">
-                <Link to={'/cart'}> <FontAwesomeIcon icon={faBagShopping} size="lg" /></Link>
+              <Nav.Link href="#" style={{ color: "gray" }} className="d-flex align-items-center ms-3">
+                <Link to={'/cart'}>
+                  <FontAwesomeIcon icon={faBagShopping} size="lg" />
+                </Link>
               </Nav.Link>
 
-              <Nav.Link href="#" className="d-flex align-items-center ms-3">
-                <Link to={'/heart'}><FontAwesomeIcon icon={faHeart} size="lg" /></Link>
+              <Nav.Link href="#" style={{ color: "gray" }} className="d-flex align-items-center ms-3">
+                <Link to={'/heart'}>
+                  <FontAwesomeIcon icon={faHeart} size="lg" />
+                </Link>
               </Nav.Link>
 
-              <Nav.Link href="#" className="d-flex align-items-center ms-3" onClick={handleLogout}>
+              <Nav.Link href="#" style={{ color: "gray" }} className="d-flex align-items-center ms-3" onClick={handleLogout}>
                 <FontAwesomeIcon icon={faDoorClosed} size="lg" />
               </Nav.Link>
 
-              <Nav.Link href="#" className="d-flex align-items-center ms-3">
-                <Link to={'/profile'}><FontAwesomeIcon icon={faUser} size="lg" /></Link>
+              <Nav.Link href="#" style={{ color: "gray" }} className="d-flex align-items-center ms-3">
+                <Link to={'/profile'}>
+                  <FontAwesomeIcon icon={faUser} size="lg" />
+                </Link>
               </Nav.Link>
+
+
             </Nav>
           </Navbar.Collapse>
         </Container>
       </Navbar>
 
       <main className="flex-grow-1 d-flex justify-content-center align-items-center mb-4">
-  <div className="w-75">
-    <Carousel autoplay>
-      <div>
-        <img src="https://mtsmart.vn/uploads/blog/nhung-ung-dung-thay-doi-hinh-nen-tu-dong-tren-dien-thoai-android-tot-nhat-ban-nen-thu-240108023951.jpg" alt="Image 1" style={contentStyle} />
+        <div className="w-75">
+          <Carousel autoplay>
+            <div>
+              <img src="https://mtsmart.vn/uploads/blog/nhung-ung-dung-thay-doi-hinh-nen-tu-dong-tren-dien-thoai-android-tot-nhat-ban-nen-thu-240108023951.jpg" alt="Image 1" style={contentStyle} />
+            </div>
+            <div>
+              <img src="https://cdn.tgdd.vn/Files/2022/08/17/1456871/cach-tao-slideshow-tren-iphone-thumb.jpg" alt="Image 2" style={contentStyle} />
+            </div>
+            <div>
+              <img src="https://cdn2.fptshop.com.vn/unsafe/Uploads/images/tin-tuc/162630/Originals/Animoto.jpg" alt="Image 3" style={contentStyle} />
+            </div>
+            <div>
+              <img src="https://cdn.tgdd.vn/Files/2019/03/29/1157561/f11-pro-black-carousel-1_800x450.jpg" alt="Image 4" style={contentStyle} />
+            </div>
+          </Carousel>
+        </div>
+      </main>
+
+      <div className="mb-4">
+        <img src='https://cuahangsamsung.vn/filemanager/userfiles/hinh-san-pham/banner/samsung-banner-dien-thoai.png' style={{ width: "100%", height: "210px" }} alt="Samsung Banner" />
       </div>
-      <div>
-        <img src="https://cdn.tgdd.vn/Files/2022/08/17/1456871/cach-tao-slideshow-tren-iphone-thumb.jpg" alt="Image 2" style={contentStyle} />
+
+      <ProductList products={products.filter(product => product.name.includes('Samsung')).slice(0, 4)} title="Samsung" />
+
+      <div className="mb-4">
+        <img src='https://file.hstatic.net/1000379731/file/anh_chup_man_hinh_2021-09-15_luc_13.47.01_9e87534e281b4aeebbb8e7e5dccfc632.png' style={{ width: "100%", height: "210px" }} alt="Iphone Banner" />
       </div>
-      <div>
-        <img src="https://cdn2.fptshop.com.vn/unsafe/Uploads/images/tin-tuc/162630/Originals/Animoto.jpg" alt="Image 3" style={contentStyle} />
+
+      <ProductList products={products.filter(product => product.name.includes('Iphone')).slice(0, 4)} title="Iphone" />
+
+      <div className="mb-4">
+        <img src='https://cdn-media.sforum.vn/storage/app/media/wp-content/uploads/2019/05/OPPO-A9-face.png' style={{ width: "100%", height: "210px" }} alt="OPPO Banner" />
       </div>
-      <div>
-        <img src="https://cdn.tgdd.vn/Files/2019/03/29/1157561/f11-pro-black-carousel-1_800x450.jpg" alt="Image 4" style={contentStyle} />
+
+      <ProductList products={products.filter(product => product.name.includes('OPPO')).slice(0, 4)} title="OPPO" />
+
+      <div className="mb-4">
+        <img src='https://cdn.tgdd.vn/hoi-dap/1355217/banner-tgdd-800x300.jpg' style={{ width: "100%", height: "210px" }} alt="OPPO Banner" />
       </div>
-    </Carousel>
-  </div>
-</main>
 
-<div className="mb-4">
-  <img src='https://cuahangsamsung.vn/filemanager/userfiles/hinh-san-pham/banner/samsung-banner-dien-thoai.png' style={{ width: "100%", height: "210px" }} alt="Samsung Banner" />
-</div>
-
-<ProductList products={products.filter(product => product.name.includes('Samsung')).slice(0, 4)} title="Samsung" />
-
-<div className="mb-4">
-  <img src='https://file.hstatic.net/1000379731/file/anh_chup_man_hinh_2021-09-15_luc_13.47.01_9e87534e281b4aeebbb8e7e5dccfc632.png' style={{ width: "100%", height: "210px" }} alt="Iphone Banner" />
-</div>
-
-<ProductList products={products.filter(product => product.name.includes('Iphone')).slice(0, 4)} title="Iphone" />
-
-<div className="mb-4">
-  <img src='https://cdn-media.sforum.vn/storage/app/media/wp-content/uploads/2019/05/OPPO-A9-face.png' style={{ width: "100%", height: "210px" }} alt="OPPO Banner" />
-</div>
-
-<ProductList products={products.filter(product => product.name.includes('OPPO')).slice(0, 4)} title="OPPO" />
-
-<ProductList products={products.slice(0, 4)} title="Sản phẩm bán chạy" />
+      <ProductList products={products.slice(0, 4)} title="Sản phẩm bán chạy" />
 
 
       <footer className="page-footer bg-dark text-white font-small blue pt-4 mt-auto">

@@ -16,6 +16,7 @@ import Register from '../page/register'
 import CategoryManager from '../page/AdminPage/CategoryManager'
 import ProductDetail from '../page/UserPage/productDetail'
 import Buy from '../page/UserPage/Buy'
+import HistoryProduct from '../page/AdminPage/HistoryProduct'
 
 
 
@@ -55,6 +56,7 @@ const Router = () => {
         <Route index element={<DashBoard />}/>
         <Route path='product' element={<Products />} />
         <Route path='useraccount' element={<UserAccount />}/>
+        <Route path='historyproduct' element={<HistoryProduct/>}></Route>
       </Route>
 
       {/*Đường dẫn lỗi*/}

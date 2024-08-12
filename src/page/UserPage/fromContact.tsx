@@ -120,7 +120,7 @@ const FormContact = () => {
                   required
                   className="form-control mb-3"
                 />
-                <Button type="submit" variant="primary">Gửi</Button>
+                <Button type="submit" variant="outline-secondary">Gửi</Button>
               </form>
             </div>
           </div>

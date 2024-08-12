@@ -1,29 +1,68 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchUser } from '../../store/slice/userSlice';
+import { fetchUser, updateUser } from '../../store/slice/userSlice';
 import { Button, Container, Form, Nav, Navbar, NavDropdown } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBagShopping, faHeart, faDoorClosed, faUser, faHome, faHistory } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
 import { RootState } from '../../store';
 
-interface User {
-  name: string;
-  email: string;
-  password: string;
-  phone: string;
-  birthday: string;
-}
-
 const ProfileUser = () => {
   const dispatch = useDispatch();
-  const { userLogin, isLoading, error } = useSelector((state: RootState) => state.user);
+  const { userInfo, isLoading, error } = useSelector((state: RootState) => state.user);
+  const [editMode, setEditMode] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    phone: '',
+    birthday: ''
+  });
 
   useEffect(() => {
     dispatch(fetchUser());
   }, [dispatch]);
 
-  const user = userLogin && typeof userLogin === 'object' && 'name' in userLogin ? (userLogin as User) : null;
+  useEffect(() => {
+    if (userInfo) {
+      setFormData({
+        name: userInfo.fullName || '',
+        email: userInfo.email || '',
+        password: '', // Keep password empty initially
+        phone: userInfo.phone || '',
+        birthday: userInfo.birthday || ''
+      });
+    }
+  }, [userInfo]);
+
+  const handleEditClick = () => {
+    setEditMode(!editMode);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    dispatch(updateUser(formData))
+      .unwrap()
+      .then((updatedUser: any) => {
+        // Update localStorage after successful update
+        localStorage.setItem('fullName', updatedUser.fullName);
+        localStorage.setItem('email', updatedUser.email);
+        localStorage.setItem('phone', updatedUser.phone);
+        localStorage.setItem('birthday', updatedUser.birthday);
+
+        // Optionally update the Redux state if needed
+        dispatch(fetchUser());
+
+        setEditMode(false);
+      })
+      .catch((err: any) => {
+        console.error("Failed to update user: ", err);
+      });
+  };
 
   return (
     <div className="d-flex flex-column min-vh-100">
@@ -91,16 +130,65 @@ const ProfileUser = () => {
           <h2>User Profile</h2>
           {isLoading && <p>Loading...</p>}
           {error && <p>Error: {error}</p>}
-          {user ? (
-            <div>
-              <p>Name: {user.name}</p>
-              <p>Email: {user.email}</p>
-              <p>Password: {user.password}</p>
-              <p>Phone: {user.phone}</p>
-              <p>Birthday: {user.birthday}</p>
-            </div>
+          {editMode ? (
+            <Form onSubmit={handleSubmit} className="border p-4 rounded bg-light">
+              <Form.Group className="mb-3">
+                <Form.Label>Name</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Email</Form.Label>
+                <Form.Control
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Password</Form.Label>
+                <Form.Control
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Phone</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Birthday</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="birthday"
+                  value={formData.birthday}
+                  onChange={handleChange}
+                />
+              </Form.Group>
+              <Button variant="primary" type="submit">Save</Button>
+              <Button variant="secondary" onClick={handleEditClick} className="ms-2">Cancel</Button>
+            </Form>
           ) : (
-            <p>No user information found.</p>
+            <div className="border p-4 rounded bg-light">
+              <p>Name: {userInfo?.fullName}</p>
+              <p>Email: {userInfo?.email}</p>
+              <p>Password: {'********'}</p>
+              <p>Phone: {userInfo?.phone}</p>
+              <p>Birthday: {userInfo?.birthday}</p>
+              <Button variant="primary" onClick={handleEditClick}>Edit</Button>
+            </div>
           )}
         </div>
       </div>

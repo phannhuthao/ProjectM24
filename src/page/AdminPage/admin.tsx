@@ -1,6 +1,6 @@
 import React from 'react';
 import { GetProp, Layout, Menu, MenuProps, theme } from 'antd';
-import { AppstoreOutlined, HomeOutlined, ProductOutlined, UserOutlined } from '@ant-design/icons';
+import { AppstoreOutlined, HistoryOutlined, HomeOutlined, ProductOutlined, UserOutlined } from '@ant-design/icons';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { Button } from 'react-bootstrap';
 
@@ -27,6 +27,11 @@ const items: MenuItem[] = [
     key: '/admin/useraccount',
     icon: <UserOutlined />,
     label: 'UserAccount',
+  },
+  {
+    key: '/admin/historyProduct',
+    icon: <HistoryOutlined />,
+    label: 'HistoryProduct',
   }
 ];
 
