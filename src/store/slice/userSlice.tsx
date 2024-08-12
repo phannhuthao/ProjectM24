@@ -1,54 +1,76 @@
-import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { instance } from "../../service";
 import { loginApi } from "../../service/User/auth";
+import { UserType } from "../../confirg/interface";
 
-
-// export const fetchAllUsers: any = createAsyncThunk('users/fetchAll', async () => {
-//     const response = await axios.get('/path/to/data.json'); // Thay đổi đường dẫn đến file data.json
-//     return response.data.users;
-//   });
-
-const initState = {
-    isLoading: false,
-    error: "",
-    userLogin:{}
+interface UserState {
+  isLoading: boolean;
+  error: string;
+  userLogin: UserType | null;
 }
 
-export const registerUser: any = createAsyncThunk('user/register', async (data:{})=> {
-    // call api
-    const res = await instance.post("register",data)
-    return res.data;
-})
+const initialState: UserState = {
+  isLoading: false,
+  error: "",
+  userLogin: null,
+};
 
-export const loginUser: any = createAsyncThunk('user/login', (data: {email: string, password: string})=> {
-    return loginApi(data)
-})
+export const registerUser: any = createAsyncThunk('user/register', async (data: any) => {
+  const res = await instance.post("register", data);
+  return res.data;
+});
+
+export const loginUser: any = createAsyncThunk('user/login', async (data: { email: string; password: string }) => {
+  return loginApi(data);
+});
+
+export const fetchUser: any = createAsyncThunk('user/fetchUser', async () => {
+  const res = await instance.get("users");
+  return res.data;
+});
 
 const userSlice = createSlice({
-    name:"user",
-    initialState : initState,
-    reducers:{},
-    extraReducers: (builder)=>{
-        builder.addCase(registerUser.fulfilled,(state, action)=>{
-            // cập nhật state
-            state.userLogin = action.payload
-            
-            // lưu token vào local
-            localStorage.setItem("access_token",action.payload.accessToken)
-        })
+  name: "user",
+  initialState,
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(registerUser.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(registerUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.userLogin = action.payload.user;
+        localStorage.setItem("access_token", action.payload.accessToken);
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "Failed to register";
+      })
+      .addCase(loginUser.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(loginUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        localStorage.setItem('access_token', action.payload.accessToken);
+        state.userLogin = action.payload.user;
+      })
+      .addCase(loginUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "Login failed";
+      })
+      .addCase(fetchUser.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(fetchUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.userLogin = action.payload;
+      })
+      .addCase(fetchUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "Failed to fetch user";
+      });
+  }
+});
 
-        builder.addCase(loginUser.fulfilled,(state,action)=>{
-           // đăng nhập thành công 
-           console.log(action);
-           localStorage.setItem('access_token',action.payload.accessToken);
-           state.userLogin = action.payload.user
-        })
-        .addCase(loginUser.rejected,(state,action)=>{
-            // đăng nhập thành công 
-            if(action.payload.status === 400) {
-                state.error = "tên đăng nhập hoặc mật khẩu không đúng"
-            }
-         })
-    }
-})
-export const {reducer} = userSlice
+export const { reducer } = userSlice;

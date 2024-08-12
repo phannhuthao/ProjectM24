@@ -12,8 +12,7 @@ export const formatVND = new Intl.NumberFormat('vi-VN', {
     currency: 'VND',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
-  });
-  
+});
 
 interface Product {
     id: string;
@@ -22,34 +21,35 @@ interface Product {
     price: string;
 }
 
-// render danh sách sản phẩm
 const ProductList = ({ products, title }: { products: Product[], title: string }) => (
     <>
-      <h1 style={{ textAlign: 'center' }}>{title}</h1>
-      <div className="renderInformationProduct container my-4">
-        <div className="row">
-          {products.map((product) => (
-            <div key={product.id} className="col-md-3 mb-4">
-              <div className="card" style={{ cursor: 'pointer' }}>
-                <img src={product.image} className="card-img-top" alt={product.name} style={{ width: '100%', height: '400px', objectFit: 'cover' }} />
-                <div className="card-body">
-                  <h5 className="card-title">{product.name}</h5>
-                  <p className="card-text">Price: {formatVND.format(Number(product.price))}</p>
-                  <Button variant="outline-secondary" style={{ marginRight: '10px'}}>Buy</Button>
-                  <Button variant="outline-secondary" style={{ marginRight: '10px'}} onClick={() => addToCart(product)}>Add to Cart</Button>
-                  <Button variant="outline-secondary" style={{ marginRight: '10px' }}>
-                      <FontAwesomeIcon icon={faHeart} size="lg" />
-                 </Button>
-                </div>
-              </div>
+        <h1 style={{ textAlign: 'center' }}>{title}</h1>
+        <div className="renderInformationProduct container my-4">
+            <div className="row">
+                {products.map((product) => (
+                    <div key={product.id} className="col-md-3 mb-4">
+                        <div className="card" style={{ cursor: 'pointer' }}>
+                            <Link to={`/productDetail/${product.id}`}>
+                                <img src={product.image} className="card-img-top" alt={product.name} style={{ width: '100%', height: '400px', objectFit: 'cover' }} />
+                            </Link>
+                            <div className="card-body">
+                                <h5 className="card-title">{product.name}</h5>
+                                <p className="card-text">Price: {formatVND.format(Number(product.price))}</p>
+                                <Button variant="outline-secondary" style={{ marginRight: '10px' }}>Buy</Button>
+                                <Button variant="outline-secondary" style={{ marginRight: '10px' }} onClick={() => addToCart(product)}>Add to Cart</Button>
+                                <Button variant="outline-secondary" style={{ marginRight: '10px' }} onClick={() => addToWishlist(product)}>
+                                    <FontAwesomeIcon icon={faHeart} size="lg" />
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                ))}
             </div>
-          ))}
         </div>
-      </div>
     </>
-  );
+);
 
-  const addToCart = (product: Product) => {
+const addToCart = (product: Product) => {
     let cart = JSON.parse(localStorage.getItem('cart') || '[]');
     const existingProductIndex = cart.findIndex((item: Product) => item.id === product.id);
     if (existingProductIndex >= 0) {
@@ -58,11 +58,27 @@ const ProductList = ({ products, title }: { products: Product[], title: string }
       cart.push({ ...product, quantity: 1 });
     }
     localStorage.setItem('cart', JSON.stringify(cart));
+    alert('Sản phẩm đã được thêm vào giỏ hàng');
   };
+  
 
+  const addToWishlist = (product: Product) => {
+    let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+    const existingProductIndex = wishlist.findIndex((item: Product) => item.id === product.id);
+  
+    if (existingProductIndex === -1) {
+      wishlist.push(product);
+    }
+  
+    localStorage.setItem('wishlist', JSON.stringify(wishlist));
+    alert('Sản phẩm đã được thêm vào phần yêu thích');
+  };
 const Product = () => {
     const [products, setProducts] = useState<Product[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filterBrand, setFilterBrand] = useState('');
+    const [sortOrder, setSortOrder] = useState(''); // Trạng thái lưu chọn lọc theo giá
     const itemsPerPage = 8;
 
     useEffect(() => {
@@ -78,12 +94,40 @@ const Product = () => {
         fetchProducts();
     }, []);
 
+    // Lọc và sắp xếp sản phẩm
+    const filteredAndSortedProducts = products
+        .filter(product =>
+            product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+            (filterBrand ? product.name.toLowerCase().includes(filterBrand.toLowerCase()) : true)
+        )
+        .sort((a, b) => {
+            if (sortOrder === 'ascending') {
+                return Number(a.price) - Number(b.price);
+            } else if (sortOrder === 'descending') {
+                return Number(b.price) - Number(a.price);
+            } else {
+                return 0; // Không sắp xếp nếu không có lựa chọn
+            }
+        });
+
     const indexOfLastProduct = currentPage * itemsPerPage;
     const indexOfFirstProduct = indexOfLastProduct - itemsPerPage;
-    const currentProducts = products.slice(indexOfFirstProduct, indexOfLastProduct);
+    const currentProducts = filteredAndSortedProducts.slice(indexOfFirstProduct, indexOfLastProduct);
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
+    };
+
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTerm(e.target.value);
+    };
+
+    const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setFilterBrand(e.target.value);
+    };
+
+    const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setSortOrder(e.target.value);
     };
 
     return (
@@ -116,6 +160,8 @@ const Product = () => {
                                     placeholder="Search"
                                     className="me-2"
                                     aria-label="Search"
+                                    value={searchTerm}
+                                    onChange={handleSearchChange}
                                 />
                                 <Button className='btn-search' variant="outline-primary">Search</Button>
                             </Form>
@@ -148,17 +194,90 @@ const Product = () => {
                 </Container>
             </Navbar>
 
+            <div className="section_header" style={{ marginBottom: '20px' }}>
+                <div
+                    className="product-sorting"
+                    style={{
+                        marginLeft: "auto",
+                        textAlign: "left",
+                        fontSize: 14,
+                        fontWeight: "bold"
+                    }}
+                >
+                    <label htmlFor="sort-order">Sắp xếp theo giá:</label>
+                    <select id="sort-order" onChange={handleSortChange}>
+                        <option value="">Chọn sắp xếp</option>
+                        <option value="ascending">Giá: Thấp đến Cao</option>
+                        <option value="descending">Giá: Cao đến Thấp</option>
+                    </select>
+                </div>
+                <div
+                    className="product-filter"
+                    style={{
+                        marginTop: "10px",
+                        fontSize: 14,
+                        fontWeight: "bold"
+                    }}
+                >
+                    <label htmlFor="filter-brand">Lọc theo thương hiệu:</label>
+                    <select id="filter-brand" onChange={handleFilterChange}>
+                        <option value="">Tất cả</option>
+                        <option value="Samsung">Samsung</option>
+                        <option value="Iphone">Iphone</option>
+                        <option value="Oppo">Oppo</option>
+                    </select>
+                </div>
+            </div>
+
             <ProductList products={currentProducts} title="All Products" />
 
             <Container className="d-flex justify-content-center my-4">
                 <Pagination
                     current={currentPage}
                     onChange={handlePageChange}
-                    total={products.length}
+                    total={filteredAndSortedProducts.length}
                     pageSize={itemsPerPage}
                     showSizeChanger={false}
                 />
             </Container>
+
+            <footer className="page-footer bg-dark text-white font-small blue pt-4 mt-auto">
+                <div className="container-fluid text-center text-md-left">
+                    <div className="row">
+                        <div className="col-md-4 mt-md-0 mt-3">
+                            <h5 className="text-uppercase">EYYO Shop</h5>
+                            <p>Specializing in selling cheap watches.</p>
+                            <p>Good quality products, top reputation.</p>
+                        </div>
+
+                        <div className="col-md-2 mb-md-0 mb-3">
+                            <h5 className="text-uppercase">Sản phẩm nổi bật</h5>
+                            <ul className="list-unstyled">
+                                <li><p>Samsung</p></li>
+                                <li><p>Iphone</p></li>
+                                <li><p>Oppo</p></li>
+                            </ul>
+                        </div>
+
+                        <div className="col-md-2 mb-md-0 mb-3">
+                            <h5 className="text-uppercase">Dịch vụ khách hàng</h5>
+                            <ul className="list-unstyled">
+                                <li><p>Chế độ bảo hành</p></li>
+                                <li><p>Dịch vụ sửa chữa</p></li>
+                                <li><p>Dịch vụ đổi mới</p></li>
+                            </ul>
+                        </div>
+
+                        <div className="col-md-2 mb-md-0 mb-3">
+                            <h5 className="text-uppercase">Liên Hệ</h5>
+                            <ul className="list-unstyled">
+                                <li><p>0862536828</p></li>
+                                <li><p>EYYO@gmail.com</p></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </footer>
         </>
     );
 };

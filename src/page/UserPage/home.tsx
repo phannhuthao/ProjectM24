@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBagShopping, faHeart, faDoorClosed, faUser } from '@fortawesome/free-solid-svg-icons';
 import React, { useEffect, useState } from 'react';
 import { Carousel } from 'antd';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 // Định dạng tiền tệ Việt Nam
@@ -37,6 +37,19 @@ const HomePage = () => {
     fetchProducts();
   }, []);
 
+  const navigate = useNavigate(); // Hook for programmatic navigation
+
+  const handleLogout = () => {
+    const confirmLogout = window.confirm('Bạn có muốn đăng xuất không');
+    if (confirmLogout) {
+      // Clear user data from localStorage or other logout logic here
+      localStorage.removeItem('user'); // Example of clearing user data
+      navigate('/login'); // Redirect to login page
+    }
+  };
+
+  
+
   const ProductList = ({ products, title }: { products: Product[], title: string }) => (
     <>
       <h1 style={{ textAlign: 'center' }}>{title}</h1>
@@ -45,7 +58,9 @@ const HomePage = () => {
           {products.map((product) => (
             <div key={product.id} className="col-md-3 mb-4">
               <div className="card" style={{ cursor: 'pointer' }}>
-                <img src={product.image} className="card-img-top" alt={product.name} style={{ width: '100%', height: '400px', objectFit: 'cover' }} />
+                <Link to={`/productDetail/${product.id}`}>
+                  <img src={product.image} className="card-img-top" alt={product.name} style={{ width: '100%', height: '400px', objectFit: 'cover' }} />
+                </Link>
                 <div className="card-body">
                   <h5 className="card-title">{product.name}</h5>
                   <p className="card-text">Price: {formatVND.format(Number(product.price))}</p>
@@ -72,17 +87,20 @@ const HomePage = () => {
       cart.push({ ...product, quantity: 1 });
     }
     localStorage.setItem('cart', JSON.stringify(cart));
+    alert('Sản phẩm đã được thêm vào giỏ hàng');
   };
+  
 
   const addToWishlist = (product: Product) => {
     let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
     const existingProductIndex = wishlist.findIndex((item: Product) => item.id === product.id);
   
     if (existingProductIndex === -1) {
-      wishlist.push(product); 
+      wishlist.push(product);
     }
   
     localStorage.setItem('wishlist', JSON.stringify(wishlist));
+    alert('Sản phẩm đã được thêm vào phần yêu thích');
   };
   
 
@@ -111,7 +129,7 @@ const HomePage = () => {
                   <Link to={'/product'} style={{ textDecoration: 'none', color: 'black' }}>Product</Link>
                 </Nav.Link>
                 <Nav.Link href="#action2" className="mx-2">
-                  <Link to={'/formContact'} style={{ textDecoration: 'none', color: 'black' }}>From Contact</Link>
+                  <Link to={'/formContact'} style={{ textDecoration: 'none', color: 'black' }}>Form Contact</Link>
                 </Nav.Link>
                 <NavDropdown title="Selection" id="navbarScrollingDropdown" className="mx-2">
                   <NavDropdown.Item href="#action3">Selection</NavDropdown.Item>
@@ -138,8 +156,8 @@ const HomePage = () => {
                 <Link to={'/heart'}><FontAwesomeIcon icon={faHeart} size="lg" /></Link>
               </Nav.Link>
 
-              <Nav.Link href="#" className="d-flex align-items-center ms-3">
-                <Link to={'/login'}><FontAwesomeIcon icon={faDoorClosed} size="lg" /></Link>
+              <Nav.Link href="#" className="d-flex align-items-center ms-3" onClick={handleLogout}>
+                <FontAwesomeIcon icon={faDoorClosed} size="lg" />
               </Nav.Link>
 
               <Nav.Link href="#" className="d-flex align-items-center ms-3">
@@ -150,29 +168,45 @@ const HomePage = () => {
         </Container>
       </Navbar>
 
-      <main className="flex-grow-1 d-flex justify-content-center align-items-center">
-        <div className="w-75">
-          <Carousel autoplay>
-            <div>
-              <img src="https://mtsmart.vn/uploads/blog/nhung-ung-dung-thay-doi-hinh-nen-tu-dong-tren-dien-thoai-android-tot-nhat-ban-nen-thu-240108023951.jpg" alt="Image 1" style={contentStyle} />
-            </div>
-            <div>
-              <img src="https://cdn.tgdd.vn/Files/2022/08/17/1456871/cach-tao-slideshow-tren-iphone-thumb.jpg" alt="Image 2" style={contentStyle} />
-            </div>
-            <div>
-              <img src="https://cdn2.fptshop.com.vn/unsafe/Uploads/images/tin-tuc/162630/Originals/Animoto.jpg" alt="Image 3" style={contentStyle} />
-            </div>
-            <div>
-              <img src="https://cdn.tgdd.vn/Files/2019/03/29/1157561/f11-pro-black-carousel-1_800x450.jpg" alt="Image 4" style={contentStyle} />
-            </div>
-          </Carousel>
-        </div>
-      </main>
+      <main className="flex-grow-1 d-flex justify-content-center align-items-center mb-4">
+  <div className="w-75">
+    <Carousel autoplay>
+      <div>
+        <img src="https://mtsmart.vn/uploads/blog/nhung-ung-dung-thay-doi-hinh-nen-tu-dong-tren-dien-thoai-android-tot-nhat-ban-nen-thu-240108023951.jpg" alt="Image 1" style={contentStyle} />
+      </div>
+      <div>
+        <img src="https://cdn.tgdd.vn/Files/2022/08/17/1456871/cach-tao-slideshow-tren-iphone-thumb.jpg" alt="Image 2" style={contentStyle} />
+      </div>
+      <div>
+        <img src="https://cdn2.fptshop.com.vn/unsafe/Uploads/images/tin-tuc/162630/Originals/Animoto.jpg" alt="Image 3" style={contentStyle} />
+      </div>
+      <div>
+        <img src="https://cdn.tgdd.vn/Files/2019/03/29/1157561/f11-pro-black-carousel-1_800x450.jpg" alt="Image 4" style={contentStyle} />
+      </div>
+    </Carousel>
+  </div>
+</main>
 
-      <ProductList products={products.filter(product => product.name.includes('Samsung')).slice(0, 4)} title="Samsung" />
-      <ProductList products={products.filter(product => product.name.includes('Iphone')).slice(0, 4)} title="Iphone" />
-      <ProductList products={products.filter(product => product.name.includes('OPPO')).slice(0, 4)} title="OPPO" />
-      <ProductList products={products.slice(0, 4)} title="Sản phẩm bán chạy" />
+<div className="mb-4">
+  <img src='https://cuahangsamsung.vn/filemanager/userfiles/hinh-san-pham/banner/samsung-banner-dien-thoai.png' style={{ width: "100%", height: "210px" }} alt="Samsung Banner" />
+</div>
+
+<ProductList products={products.filter(product => product.name.includes('Samsung')).slice(0, 4)} title="Samsung" />
+
+<div className="mb-4">
+  <img src='https://file.hstatic.net/1000379731/file/anh_chup_man_hinh_2021-09-15_luc_13.47.01_9e87534e281b4aeebbb8e7e5dccfc632.png' style={{ width: "100%", height: "210px" }} alt="Iphone Banner" />
+</div>
+
+<ProductList products={products.filter(product => product.name.includes('Iphone')).slice(0, 4)} title="Iphone" />
+
+<div className="mb-4">
+  <img src='https://cdn-media.sforum.vn/storage/app/media/wp-content/uploads/2019/05/OPPO-A9-face.png' style={{ width: "100%", height: "210px" }} alt="OPPO Banner" />
+</div>
+
+<ProductList products={products.filter(product => product.name.includes('OPPO')).slice(0, 4)} title="OPPO" />
+
+<ProductList products={products.slice(0, 4)} title="Sản phẩm bán chạy" />
+
 
       <footer className="page-footer bg-dark text-white font-small blue pt-4 mt-auto">
         <div className="container-fluid text-center text-md-left">
@@ -214,7 +248,5 @@ const HomePage = () => {
     </div>
   );
 };
-
-
 
 export default HomePage;

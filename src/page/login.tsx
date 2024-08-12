@@ -42,9 +42,7 @@ const Login = () => {
     
       if (values.email === adminCredentials.email && values.password === adminCredentials.password) {
         localStorage.setItem('role', "ADMIN");
-        
-        // dispatch(loginUser(adminCredentials));
-        // localStorage.setItem("adminLogin", JSON.stringify(adminCredentials)); 
+         
         navigate("/admin"); 
       } else {
         const storedUsers = JSON.parse(localStorage.getItem("users") || "[]");

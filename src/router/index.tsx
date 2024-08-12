@@ -14,6 +14,8 @@ import UserAccount from '../page/AdminPage/userAccount'
 import Login from '../page/login'
 import Register from '../page/register'
 import CategoryManager from '../page/AdminPage/CategoryManager'
+import ProductDetail from '../page/UserPage/productDetail'
+import Buy from '../page/UserPage/Buy'
 
 
 
@@ -29,8 +31,9 @@ const Router = () => {
       <Route path='/cart' element={<Carts />} />
       <Route path='/heart' element={<Heart />} />
       <Route path='/product' element={<Product />} />
-      <Route path='/productdetail' element={<ProductDetails />} />
+      <Route path="/productdetail/:id" element={<ProductDetail />} />
       <Route path='/formContact' element={<FormContact />} />
+      <Route path='/buy' element={<Buy/>}></Route>
 
       {/*Đường dẫn user*/}
       {/* <Route path='/home' element={<Home />}>

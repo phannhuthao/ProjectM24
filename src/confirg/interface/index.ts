@@ -5,6 +5,7 @@ export type UserType = {
     "fullName": string,
     "phone": string,
     "birthday": string,
+    "comment": string,
     "status": boolean,
     "id": number,
     "role": string

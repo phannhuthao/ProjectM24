@@ -1,8 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchUser } from '../../store/slice/userSlice';
 import { Button, Container, Form, Nav, Navbar, NavDropdown } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBagShopping, faHeart, faDoorClosed, faUser, faHome, faInfoCircle, faContactCard } from '@fortawesome/free-solid-svg-icons';
+import { faBagShopping, faHeart, faDoorClosed, faUser, faHome, faHistory } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
+import { RootState } from '../../store';
 
 interface User {
   name: string;
@@ -13,20 +16,20 @@ interface User {
 }
 
 const ProfileUser = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const dispatch = useDispatch();
+  const { userLogin, isLoading, error } = useSelector((state: RootState) => state.user);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('users');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
+    dispatch(fetchUser());
+  }, [dispatch]);
+
+  const user = userLogin && typeof userLogin === 'object' && 'name' in userLogin ? (userLogin as User) : null;
 
   return (
     <div className="d-flex flex-column min-vh-100">
       <Navbar expand="lg" className="bg-body-tertiary">
         <Container fluid>
-          <Navbar.Brand><Link to={'/home'} style={{ textDecoration: 'none', color:'black'  }}>Ohayo</Link></Navbar.Brand>
+          <Navbar.Brand><Link to={'/home'} style={{ textDecoration: 'none', color:'black' }}>Ohayo</Link></Navbar.Brand>
           <Navbar.Toggle aria-controls="navbarScroll" />
           <Navbar.Collapse id="navbarScroll">
             <Nav className="me-auto my-2 my-lg-0 d-flex justify-content-between w-100" navbarScroll>
@@ -66,24 +69,19 @@ const ProfileUser = () => {
         </Container>
       </Navbar>
 
-       {/* Sidebar */}
+      {/* Sidebar */}
       <div className="d-flex flex-grow-1">
         <div className="sidebar bg-dark text-white d-flex flex-column p-3" style={{ width: '250px' }}>
           <h4 className="mb-4">Menu</h4>
           <ul className="nav flex-column">
             <li className="nav-item mb-2">
               <Link to="/" className="nav-link text-white">
-                <FontAwesomeIcon icon={faHome} /> Home
+                <FontAwesomeIcon icon={faHome} /> About
               </Link>
             </li>
             <li className="nav-item mb-2">
               <Link to="/about" className="nav-link text-white">
-                <FontAwesomeIcon icon={faInfoCircle} /> About
-              </Link>
-            </li>
-            <li className="nav-item mb-2">
-              <Link to="/contact" className="nav-link text-white">
-                <FontAwesomeIcon icon={faContactCard} /> Contact
+                <FontAwesomeIcon icon={faHistory} /> History
               </Link>
             </li>
           </ul>
@@ -91,13 +89,15 @@ const ProfileUser = () => {
 
         <div className="flex-grow-1 d-flex flex-column p-4">
           <h2>User Profile</h2>
+          {isLoading && <p>Loading...</p>}
+          {error && <p>Error: {error}</p>}
           {user ? (
             <div>
-              <p>Name:{user.name}</p>
+              <p>Name: {user.name}</p>
               <p>Email: {user.email}</p>
               <p>Password: {user.password}</p>
               <p>Phone: {user.phone}</p>
-              <p>Birthday:{user.birthday}</p>
+              <p>Birthday: {user.birthday}</p>
             </div>
           ) : (
             <p>No user information found.</p>

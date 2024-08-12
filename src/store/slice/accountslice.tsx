@@ -26,9 +26,22 @@ export const addUser: any = createAsyncThunk('account/add', async (newUser: User
 });
 
 export const updateUserRole: any = createAsyncThunk('account/updateUserRole', async ({ userId, role }: { userId: number, role: boolean }) => {
-    const response = await instance.put(`/api/users/${userId}`, { role });
+    const response = await instance.put(`users/${userId}`, { role });
     return response.data;
 });  
+
+// Chặn 
+export const blockUser: any = createAsyncThunk('account/block', async (userId: number) => {
+    const response = await instance.put(`/users/${userId}`);
+    return response.data;
+});
+
+// Bỏ chặn 
+export const unblockUser: any = createAsyncThunk('account/unblock', async (userId: number) => {
+    const response = await instance.put(`/users/${userId}`);
+    return response.data;
+});
+
   
 interface AccountState {
     isLoading: boolean;
@@ -77,6 +90,20 @@ const accountSlice = createSlice({
         // thêm
         builder.addCase(addUser.fulfilled, (state, action) => {
             state.accounts.push(action.payload);
+        });
+        // Chặn
+        builder.addCase(blockUser.fulfilled, (state, action) => {
+            const index = state.accounts.findIndex(user => user.id === action.payload.id);
+            if (index !== -1) {
+                state.accounts[index].status = true; 
+            }
+        });
+        // Bỏ chặn 
+        builder.addCase(unblockUser.fulfilled, (state, action) => {
+            const index = state.accounts.findIndex(user => user.id === action.payload.id);
+            if (index !== -1) {
+                state.accounts[index].status = false; 
+            }
         });
     }
 })
