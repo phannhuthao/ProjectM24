@@ -16,9 +16,8 @@ interface AccountAdmin {
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const userLogin = useSelector((state: RootState) => state.user.userLogin);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
+  const { userLogin, isLoading, error } = useSelector((state: RootState) => state.user);
+  const [localError, setLocalError] = useState<string | null>(null);
 
   const adminCredentials: AccountAdmin = {
     email: "admin@gmail.com",
@@ -38,47 +37,40 @@ const Login = () => {
         .required("Không được để trống")
     }),
     onSubmit: async (values) => {
-      console.log("Submitting values:", values); // Kiểm tra giá trị khi gửi
-    
+      setLocalError(null);
+
       if (values.email === adminCredentials.email && values.password === adminCredentials.password) {
         localStorage.setItem('role', "ADMIN");
-         
-        navigate("/admin"); 
+        navigate("/admin");
       } else {
-        const storedUsers = JSON.parse(localStorage.getItem("users") || "[]");
-        const user = storedUsers.find((user: any) => user.email === values.email && user.password === values.password);
-    
-        if (user) {
-          dispatch(loginUser(user));
-          navigate("/home"); 
-        } else {
-          setErrorMessage("TÀI KHOẢN NÀY CHƯA ĐƯỢC ĐĂNG KÍ HOẶC KHÔNG TỒN TẠI");
-        }
+        dispatch(loginUser(values))
+          .unwrap()
+          .then(() => {
+            navigate("/home");
+          })
+          .catch((err: any) => {
+            setLocalError(err.message);
+          });
       }
-    }    
+    }
   });
 
   useEffect(() => {
     if (userLogin) {
-      // Điều hướng nếu cần thiết
+      navigate("/home");
     }
   }, [userLogin, navigate]);
-
-  const onSubmitForm = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    formik.handleSubmit();
-  };
 
   return (
     <Container className="login-container my-5">
       <Row className="justify-content-center">
         <Col md={6} lg={4}>
-          <Form onSubmit={onSubmitForm} className="login-form p-4 rounded">
+          <Form onSubmit={formik.handleSubmit} className="login-form p-4 rounded">
             <h2 className="text-center mb-4">Login</h2>
             
-            {errorMessage && (
+            {localError && (
               <div className="alert alert-danger" role="alert">
-                {errorMessage}
+                {localError}
               </div>
             )}
   
@@ -112,14 +104,15 @@ const Login = () => {
               </Form.Control.Feedback>
             </Form.Group>
   
-            <Button variant="primary" type="submit" className="w-100 mt-4">
-              Login
+            <Button variant="primary" type="submit" className="w-100 mt-4" disabled={isLoading}>
+              {isLoading ? "Logging in..." : "Login"}
             </Button>
             <p>Bạn đã có tài khoản chưa ? <Link to={"/register"}>Đăng kí</Link></p>
           </Form>
         </Col>
       </Row>
     </Container>
-  );  
+  );
 };
+
 export default Login;

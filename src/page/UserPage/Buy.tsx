@@ -24,19 +24,26 @@ interface Product {
 
 const Buy = () => {
   const [productsToBuy, setProductsToBuy] = useState<Product[]>([]);
-  const [totalPrice, setTotalPrice] = useState<number>(0);
+  const [cart, setCart] = useState<Product[]>([]); // State for the cart
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]); // State for selected products
+  const [totalCurrent, setTotalCurrent] = useState<number>(0);
   const navigate = useNavigate();
 
   useEffect(() => {
     const storedProducts = JSON.parse(localStorage.getItem('productsToBuy') || '[]') as Product[];
     setProductsToBuy(storedProducts);
 
-    const total = storedProducts.reduce((acc: number, product: Product) => {
-      return acc + product.totalPrice;
-    }, 0);
-
-    setTotalPrice(total);
+    setCart(storedProducts); // Replace with actual cart fetching logic
+    setSelectedProducts(storedProducts.map(product => product.id)); // Replace with actual selected products logic
   }, []);
+
+  useEffect(() => {
+    // tính toán tổng số tiền
+    const total = cart
+      .filter((product) => selectedProducts.includes(product.id))
+      .reduce((acc, product) => acc + Number(product.price) * product.quantity, 0);
+    setTotalCurrent(total);
+  }, [selectedProducts, cart]);
 
   const handleConfirmPurchase = () => {
     localStorage.removeItem('cart');
@@ -99,7 +106,6 @@ const Buy = () => {
                   <FontAwesomeIcon icon={faUser} size="lg" />
                 </Link>
               </Nav.Link>
-
             </Nav>
           </Navbar.Collapse>
         </Container>
@@ -107,30 +113,43 @@ const Buy = () => {
 
       <Container className="my-4">
         <h2 className="text-center mb-4">Thông tin sản phẩm mua</h2>
-        {productsToBuy.map((product) => (
-          <div key={product.id} className="row mb-4">
-            <div className="col-md-6">
-              <img src={product.image} alt={product.name} style={{ width: '100%', height: '680px', objectFit: 'cover' }} />
+        <div className="row">
+          {productsToBuy.map((product) => (
+            <div key={product.id} className="col-md-3 mb-4">
+              <div className="d-flex flex-column align-items-center">
+                <img 
+                  src={product.image} 
+                  alt={product.name} 
+                  className="img-fluid" 
+                  style={{ maxHeight: '200px', objectFit: 'contain' }}
+                />
+                <h3 className="text-center mt-2">{product.name}</h3>
+                <p className="text-center">Price: {formatVND.format(product.price)}</p>
+                <p className="text-center">Quantity: {product.quantity}</p>
+              </div>
             </div>
-            <div className="col-md-6">
-              <h3>{product.name}</h3>
-              <p>Price: {formatVND.format(product.price)}</p>
-              <p>Quantity: {product.quantity}</p>
-              <p>Total Price: {formatVND.format(product.totalPrice)}</p>
-              <Form>
-                <Form.Group className="mb-3">
-                  <Form.Label>Phương thức thanh toán</Form.Label>
-                  <Form.Control type="text" placeholder="Nhập phương thức thanh toán" />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label>Voucher</Form.Label>
-                  <Form.Control type="text" placeholder="Nhập mã voucher" />
-                </Form.Group>
-                <Button variant="primary" onClick={handleConfirmPurchase}>Thanh toán</Button>
-              </Form>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
+
+        {/* Display total price once */}
+        <div className="text-center mb-4">
+          <h3>Total Price: {formatVND.format(totalCurrent)}</h3>
+        </div>
+
+        {/* Render the form only once */}
+        {productsToBuy.length > 0 && (
+          <Form>
+            <Form.Group className="mb-3">
+              <Form.Label>Phương thức thanh toán</Form.Label>
+              <Form.Control type="text" placeholder="Nhập phương thức thanh toán" />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Voucher</Form.Label>
+              <Form.Control type="text" placeholder="Nhập mã voucher" />
+            </Form.Group>
+            <Button variant="primary" onClick={handleConfirmPurchase}>Thanh toán</Button>
+          </Form>
+        )}
       </Container>
     </>
   );

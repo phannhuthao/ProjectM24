@@ -2,16 +2,12 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { Button, Container, Navbar, Nav, Form } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBagShopping, faHeart, faDoorClosed, faUser } from '@fortawesome/free-solid-svg-icons';
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-
-interface Product {
-  id: string;
-  name: string;
-  image: string;
-  price: string;
-  quantity: number;
-}
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../store';
+import { fetchAllCart, deleteCartItem, deleteAllCartItems } from '../../store/slice/cartSlice';
+import { fetchAllProduct } from '../../store/slice/productSlice';
 
 export const formatVND = new Intl.NumberFormat('vi-VN', {
   style: 'currency',
@@ -21,68 +17,64 @@ export const formatVND = new Intl.NumberFormat('vi-VN', {
 });
 
 const Carts = () => {
-  const [cart, setCart] = React.useState<Product[]>([]);
-  const [selectedProducts, setSelectedProducts] = React.useState<string[]>([]);
-  const [totalCurrent, setTotalCurrent] = React.useState<number>(0);
+  const [selectedItems, setSelectedItems] = useState<number[]>([]);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  React.useEffect(() => {
-    const storedCart = JSON.parse(localStorage.getItem('cart') || '[]');
-    setCart(storedCart);
-  }, []);
+  const { cart } = useSelector((state: RootState) => state.cart);
+  const { products } = useSelector((state: RootState) => state.product);
+  const { userLogin } = useSelector((state: RootState) => state.user);
 
-  const handleQuantityChange = (id: string, delta: number) => {
-    setCart((prevCart) => {
-      const updatedCart = prevCart.map((product) => 
-        product.id === id ? { ...product, quantity: Math.max(1, product.quantity + delta) } : product
-      );
-      localStorage.setItem('cart', JSON.stringify(updatedCart));
-      return updatedCart;
+  useEffect(() => {
+    if (userLogin) {
+      dispatch(fetchAllCart(userLogin.id));
+      dispatch(fetchAllProduct());
+    } else {
+      navigate('/login');
+    }
+  }, [userLogin, dispatch, navigate]);
+
+  const listCart = useMemo(() => {
+    return cart.map((c) => {
+      return {
+        product: products.find(p => p.id === c.productId),
+        quantity: c.quantity
+      };
     });
-  };
+  }, [cart, products]);
 
-  const handleDeleteOneProduct = (id: string) => {
-    setCart((prevCart) => {
-      const updatedCart = prevCart.filter((product) => product.id !== id);
-      localStorage.setItem('cart', JSON.stringify(updatedCart));
-      return updatedCart;
-    });
-    setSelectedProducts((prevSelected) => prevSelected.filter((productId) => productId !== id));
+  const handleDelete = (cartItemId: number) => {
+    dispatch(deleteCartItem(cartItemId));
   };
 
   const handleDeleteAll = () => {
-    setCart([]);
-    localStorage.removeItem('cart');
-    setSelectedProducts([]);
-  };
-
-  const handleSelectionProduct = (id: string) => {
-    setSelectedProducts((prevSelected) => {
-      if (prevSelected.includes(id)) {
-        return prevSelected.filter((productId) => productId !== id);
-      } else {
-        return [...prevSelected, id];
-      }
-    });
-  };
-
-  const handleBuyProduct = () => {
-    if (selectedProducts.length === 0) {
-      alert("Bạn chưa chọn sản phẩm bạn muốn mua trong giỏ hàng");
-      return;
+    if (userLogin) {
+      dispatch(deleteAllCartItems(userLogin.id));
     }
-
-    const productsToBuy = cart.filter(product => selectedProducts.includes(product.id));
-    localStorage.setItem('productsToBuy', JSON.stringify(productsToBuy));
-    navigate('/buy');
   };
 
-  React.useEffect(() => {
-    const total = cart
-      .filter((product) => selectedProducts.includes(product.id))
-      .reduce((acc, product) => acc + Number(product.price) * product.quantity, 0);
-    setTotalCurrent(total);
-  }, [selectedProducts, cart]);
+  const handleCheckboxChange = (productId: number, price: number) => {
+    setSelectedItems((prevSelected) =>
+      prevSelected.includes(productId)
+        ? prevSelected.filter((id) => id !== productId)
+        : [...prevSelected, productId]
+    );
+  };
+
+  const totalCurrent = listCart.reduce((total, item) => {
+    const productId = item.product?.id;
+    const productPrice = item.product?.price;
+  
+    // Ensure productId and productPrice are defined and valid
+    if (productId !== undefined && productPrice !== undefined && selectedItems.includes(productId)) {
+      return total + Number(productPrice);
+    }
+  
+    return total;
+  }, 0);
+  
+  
+
 
   return (
     <div className="d-flex flex-column min-vh-100">
@@ -133,37 +125,40 @@ const Carts = () => {
       </Navbar>
 
       <Container className="my-4">
-        <Button variant="outline-secondary" onClick={handleDeleteAll}  style={{marginRight: '10px'}}>Delete All</Button>
-        <Button variant="outline-secondary" onClick={handleBuyProduct} style={{marginRight: '10px'}}>Buy</Button>
-        <h1>Giỏ hàng</h1>
-        <div className="row">
-          {cart.map((item) => (
-            <div key={item.id} className="col-md-3 mb-4">
-              <div className="card">
-                <img src={item.image} className="card-img-top" alt={item.name} style={{ width: '100%', height: '400px', objectFit: 'cover' }} />
-                <div className="card-body">
-                  <h5 className="card-title">{item.name}</h5>
-                  <p className="card-text">Price: {formatVND.format(Number(item.price))}</p>
-                  <div className="d-flex align-items-center justify-content-between">
-                    <div className="d-flex align-items-center">
-                      <Button variant="outline-secondary" onClick={() => handleQuantityChange(item.id, -1)}>-</Button>
-                      <span className="mx-2">{item.quantity}</span>
-                      <Button variant="outline-secondary" style={{ marginRight: '10px' }} onClick={() => handleQuantityChange(item.id, 1)}>+</Button>
-                      <Button variant="outline-secondary" style={{ marginRight: '30px' }} onClick={() => handleDeleteOneProduct(item.id)}>Delete</Button>
-                    </div>
-                    <input
-                      type='checkbox'
-                      style={{ transform: 'scale(1.5)', marginLeft: 'auto' }}
-                      onChange={() => handleSelectionProduct(item.id)}
+      <Button variant="outline-secondary" onClick={handleDeleteAll} style={{ marginRight: '10px' }}>Delete All</Button>
+      <Button variant="outline-secondary" style={{ marginRight: '10px' }}>Buy</Button>
+      <h1>Giỏ hàng</h1>
+      <div className="row">
+        {listCart.map((item) => (
+          <div key={item.product?.id} className="col-md-3 mb-4">
+            <div className="card">
+              <img 
+                src={item.product?.image} 
+                className="card-img-top" 
+                alt={item.product?.name} 
+                style={{ width: '100%', height: '400px', objectFit: 'cover' }} 
+              />
+              <div className="card-body">
+                <h5 className="card-title">{item.product?.name}</h5>
+                <p className="card-text">Price: {formatVND.format(Number(item.product?.price))}</p>
+                <div className="d-flex align-items-center justify-content-between">
+                  <Button variant="outline-secondary" onClick={() => handleDelete(item.product?.id!)}>Delete</Button>
+                  <div style={{ display: "flex", justifyContent: "flex-end", flexGrow: 1 }}>
+                    <input 
+                      type="checkbox" 
+                      style={{ transform: 'scale(2.5)' }} 
+                      onChange={() => handleCheckboxChange(item.product?.id!, Number(item.product?.price))}
                     />
                   </div>
                 </div>
               </div>
             </div>
-          ))}
-          <p>Total current: {formatVND.format(totalCurrent)}</p>
-        </div>
-      </Container>
+          </div>
+        ))}
+        <p>Total current: {formatVND.format(totalCurrent)}</p>
+      </div>
+    </Container>
+
     </div>
   );
 };

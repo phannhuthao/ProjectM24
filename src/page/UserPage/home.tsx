@@ -6,6 +6,11 @@ import React, { useEffect, useState } from 'react';
 import { Carousel } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { RootState } from '../../store';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchAllCart } from '../../store/slice/cartSlice';
+import { instance } from '../../service';
+
 
 // Định dạng tiền tệ Việt Nam
 export const formatVND = new Intl.NumberFormat('vi-VN', {
@@ -16,7 +21,7 @@ export const formatVND = new Intl.NumberFormat('vi-VN', {
 });
 
 interface Product {
-  id: string;
+  id: number;
   name: string;
   image: string;
   price: string;
@@ -25,6 +30,10 @@ interface Product {
 
 const HomePage = () => {
   const [products, setProducts] = useState<Product[]>([]);
+  const [cartCount, setCartCount] = useState<number>(0);
+  const { cart } = useSelector((state: RootState) => state.cart);
+  const { userLogin } = useSelector((state: RootState) => state.user);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -36,20 +45,40 @@ const HomePage = () => {
       }
     };
     fetchProducts();
+    if (userLogin) {
+      dispatch(fetchAllCart(userLogin.id))
+    }
   }, []);
 
-  const navigate = useNavigate(); // Hook for programmatic navigation
+  const navigate = useNavigate(); 
 
   const handleLogout = () => {
     const confirmLogout = window.confirm('Bạn có muốn đăng xuất không');
     if (confirmLogout) {
-      // Clear user data from localStorage or other logout logic here
-      localStorage.removeItem('user'); // Example of clearing user data
-      navigate('/login'); // Redirect to login page
+      localStorage.removeItem('user'); 
+      navigate('/login'); 
     }
   };
 
+  const addToCart = (productId: number) => {
+    // nếu như cái productId đã tồn tại trong giỏ hàng thì tăng số lượng lên 1 nếu không thì cartItem mới với số lượng quantity ban đầu bằng 1
 
+    let index = cart.findIndex((item)=> item.productId === productId)
+    if(index == -1) {
+      // chưa có sản n=phẩm thì tạo mới 1 cart item
+      let cartItem = {productId: productId, quantity: 1}
+      instance.patch(`/users/${userLogin?.id}`, {carts:[...cart, cartItem]});
+    } else {
+      let newCart = cart.map((item,i)=>{
+        if (i===index){
+          return {...item,quantity:item.quantity+1}
+        }
+        return item;
+      })      
+      instance.patch(`/users/${userLogin?.id}`, {carts:[...newCart]});
+    }
+    dispatch(fetchAllCart(userLogin?.id))
+  }
 
   const ProductList = ({ products, title }: { products: Product[], title: string }) => (
     <>
@@ -65,11 +94,7 @@ const HomePage = () => {
                 <div className="card-body">
                   <h5 className="card-title">{product.name}</h5>
                   <p className="card-text">Price: {formatVND.format(Number(product.price))}</p>
-                  <Button variant="outline-secondary" style={{ marginRight: '10px' }} onClick={()=> addToBuy(product)}>Buy</Button>
-                  <Button variant="outline-secondary" style={{ marginRight: '10px' }} onClick={() => addToCart(product)}>Add to Cart</Button>
-                  <Button variant="outline-secondary" style={{ marginRight: '10px' }} onClick={() => addToWishlist(product)}>
-                    <FontAwesomeIcon icon={faHeart} size="lg" />
-                  </Button>
+                  <Button variant="outline-secondary" style={{ marginRight: '10px' }} onClick={() => addToCart(product.id)}>Add to Cart</Button>
                 </div>
               </div>
             </div>
@@ -78,39 +103,6 @@ const HomePage = () => {
       </div>
     </>
   );
-
-  const addToCart = (product: Product) => {
-    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const existingProductIndex = cart.findIndex((item: Product) => item.id === product.id);
-    if (existingProductIndex >= 0) {
-      cart[existingProductIndex].quantity += 1;
-    } else {
-      cart.push({ ...product, quantity: 1 });
-    }
-    localStorage.setItem('cart', JSON.stringify(cart));
-    alert('Sản phẩm đã được thêm vào giỏ hàng');
-  };
-
-
-  const addToWishlist = (product: Product) => {
-    let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-    const existingProductIndex = wishlist.findIndex((item: Product) => item.id === product.id);
-
-    if (existingProductIndex === -1) {
-      wishlist.push(product);
-    }
-
-    localStorage.setItem('wishlist', JSON.stringify(wishlist));
-    alert('Sản phẩm đã được thêm vào phần yêu thích');
-  };
-
-  const addToBuy = (product: Product) => {
-    const buy = { ...product, totalPrice: product.quantity * Number(product.price) };
-    localStorage.setItem('productBuy', JSON.stringify(buy));
-    window.location.href = '/buy'; // Navigate to buy page
-  };
-  
-
 
 
   const contentStyle: React.CSSProperties = {

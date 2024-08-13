@@ -1,3 +1,4 @@
+export type CartItem = {productId: number, quantity: number }
 export type UserType = {
     "email": string,
     "password": string,
@@ -5,11 +6,13 @@ export type UserType = {
     "fullName": string,
     "phone": string,
     "birthday": string,
-    "comment": string,
+    "comments": string,
     "status": boolean,
     "id": number,
     "role": string
+    "cart": CartItem[]
 }
+
 
 export type ProductType = {
     id: number,
