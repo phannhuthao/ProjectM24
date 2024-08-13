@@ -15,7 +15,7 @@ export const deleteUser: any = createAsyncThunk('account/delete', async (userId:
 
 // sửa
 export const updateUser: any = createAsyncThunk('account/edit', async() => {
-    const response = await instance.put('/user');
+    const response = await instance.put('/users');
     return response.data;
 })
 
@@ -25,6 +25,7 @@ export const addUser: any = createAsyncThunk('account/add', async (newUser: User
     return response.data;
 });
 
+// cập nhật
 export const updateUserRole: any = createAsyncThunk('account/updateUserRole', async ({ userId, role }: { userId: number, role: boolean }) => {
     const response = await instance.put(`users/${userId}`, { role });
     return response.data;
@@ -91,20 +92,20 @@ const accountSlice = createSlice({
         builder.addCase(addUser.fulfilled, (state, action) => {
             state.accounts.push(action.payload);
         });
-        // Chặn
-        builder.addCase(blockUser.fulfilled, (state, action) => {
-            const index = state.accounts.findIndex(user => user.id === action.payload.id);
-            if (index !== -1) {
-                state.accounts[index].status = true; 
-            }
-        });
-        // Bỏ chặn 
-        builder.addCase(unblockUser.fulfilled, (state, action) => {
-            const index = state.accounts.findIndex(user => user.id === action.payload.id);
-            if (index !== -1) {
-                state.accounts[index].status = false; 
-            }
-        });
+        // // Chặn
+        // builder.addCase(blockUser.fulfilled, (state, action) => {
+        //     const index = state.accounts.findIndex(user => user.id === action.payload.id);
+        //     if (index !== -1) {
+        //         state.accounts[index].status = true; 
+        //     }
+        // });
+        // // Bỏ chặn 
+        // builder.addCase(unblockUser.fulfilled, (state, action) => {
+        //     const index = state.accounts.findIndex(user => user.id === action.payload.id);
+        //     if (index !== -1) {
+        //         state.accounts[index].status = false; 
+        //     }
+        // });
     }
 })
 export const {reducer} = accountSlice

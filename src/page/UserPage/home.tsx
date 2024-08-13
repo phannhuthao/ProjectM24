@@ -94,7 +94,11 @@ const HomePage = () => {
                 <div className="card-body">
                   <h5 className="card-title">{product.name}</h5>
                   <p className="card-text">Price: {formatVND.format(Number(product.price))}</p>
+                  <Button variant="outline-secondary" style={{ marginRight: '10px' }} onClick={() => addToCart(product.id)}>Buy</Button>
                   <Button variant="outline-secondary" style={{ marginRight: '10px' }} onClick={() => addToCart(product.id)}>Add to Cart</Button>
+                  <Button variant="outline-secondary" style={{ marginRight: '10px' }}>
+                      <FontAwesomeIcon icon={faHeart} size="lg" />
+                 </Button>
                 </div>
               </div>
             </div>
@@ -129,14 +133,11 @@ const HomePage = () => {
                 <Nav.Link href="#" className="mx-2">
                   <Link to={'/product'} style={{ textDecoration: 'none', color: 'black' }}>Product</Link>
                 </Nav.Link>
-                <Nav.Link href="#action2" className="mx-2">
-                  <Link to={'/formContact'} style={{ textDecoration: 'none', color: 'black' }}>Form Contact</Link>
-                </Nav.Link>
-                <NavDropdown title="Selection" id="navbarScrollingDropdown" className="mx-2">
-                  <NavDropdown.Item href="#action3">Selection</NavDropdown.Item>
-                  <NavDropdown.Item href="#action4">Action</NavDropdown.Item>
+                <NavDropdown title="Form" id="navbarScrollingDropdown" className="mx-2">
+                  <NavDropdown.Item href="#"> <Link to={'/formContact'} style={{ textDecoration: 'none', color: 'black' }}>Form Contact</Link></NavDropdown.Item>
+                  <NavDropdown.Item href="#"> <Link to={'/customerSuveyForm'} style={{ textDecoration: 'none', color: 'black' }}>Customer Survey Form</Link></NavDropdown.Item>
                   <NavDropdown.Divider />
-                  <NavDropdown.Item href="#action5">Something else here</NavDropdown.Item>
+                  <NavDropdown.Item href="#action5">Something selection here</NavDropdown.Item>
                 </NavDropdown>
               </div>
               <Form className="d-flex mx-auto">

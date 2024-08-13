@@ -1,12 +1,11 @@
-import 'bootstrap/dist/css/bootstrap.min.css';
-import { Button, Container, Navbar, Nav, Form } from 'react-bootstrap';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Button, Container, Navbar, Nav, Form, Alert } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBagShopping, faHeart, faDoorClosed, faUser } from '@fortawesome/free-solid-svg-icons';
-import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
-import { fetchAllCart, deleteCartItem, deleteAllCartItems } from '../../store/slice/cartSlice';
+import { fetchAllCart, deleteCartItem, deleteAllCartItems, updateProductCart } from '../../store/slice/cartSlice';
 import { fetchAllProduct } from '../../store/slice/productSlice';
 
 export const formatVND = new Intl.NumberFormat('vi-VN', {
@@ -18,6 +17,7 @@ export const formatVND = new Intl.NumberFormat('vi-VN', {
 
 const Carts = () => {
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  const [showAlert, setShowAlert] = useState<boolean>(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -53,7 +53,7 @@ const Carts = () => {
     }
   };
 
-  const handleCheckboxChange = (productId: number, price: number) => {
+  const handleCheckboxChange = (productId: number) => {
     setSelectedItems((prevSelected) =>
       prevSelected.includes(productId)
         ? prevSelected.filter((id) => id !== productId)
@@ -61,20 +61,35 @@ const Carts = () => {
     );
   };
 
+  const handleQuantityChange = (productId: number, change: number) => {
+    const item = listCart.find(item => item.product?.id === productId);
+    if (item) {
+      const newQuantity = item.quantity + change;
+      if (newQuantity > 0) {
+        dispatch(updateProductCart({ productId, quantity: newQuantity, userId: userLogin?.id! }));
+      }
+    }
+  };
+
   const totalCurrent = listCart.reduce((total, item) => {
     const productId = item.product?.id;
     const productPrice = item.product?.price;
   
-    // Ensure productId and productPrice are defined and valid
     if (productId !== undefined && productPrice !== undefined && selectedItems.includes(productId)) {
-      return total + Number(productPrice);
+      return total + (Number(productPrice) * item.quantity);
     }
   
     return total;
   }, 0);
-  
-  
 
+  const handleBuy = () => {
+    if (selectedItems.length === 0) {
+      setShowAlert(true);
+    } else {
+      setShowAlert(false);
+      // Handle the buy logic here
+    }
+  };
 
   return (
     <div className="d-flex flex-column min-vh-100">
@@ -125,40 +140,48 @@ const Carts = () => {
       </Navbar>
 
       <Container className="my-4">
-      <Button variant="outline-secondary" onClick={handleDeleteAll} style={{ marginRight: '10px' }}>Delete All</Button>
-      <Button variant="outline-secondary" style={{ marginRight: '10px' }}>Buy</Button>
-      <h1>Giỏ hàng</h1>
-      <div className="row">
-        {listCart.map((item) => (
-          <div key={item.product?.id} className="col-md-3 mb-4">
-            <div className="card">
-              <img 
-                src={item.product?.image} 
-                className="card-img-top" 
-                alt={item.product?.name} 
-                style={{ width: '100%', height: '400px', objectFit: 'cover' }} 
-              />
-              <div className="card-body">
-                <h5 className="card-title">{item.product?.name}</h5>
-                <p className="card-text">Price: {formatVND.format(Number(item.product?.price))}</p>
-                <div className="d-flex align-items-center justify-content-between">
-                  <Button variant="outline-secondary" onClick={() => handleDelete(item.product?.id!)}>Delete</Button>
-                  <div style={{ display: "flex", justifyContent: "flex-end", flexGrow: 1 }}>
-                    <input 
-                      type="checkbox" 
-                      style={{ transform: 'scale(2.5)' }} 
-                      onChange={() => handleCheckboxChange(item.product?.id!, Number(item.product?.price))}
-                    />
+        <Button variant="outline-secondary" onClick={handleDeleteAll} style={{ marginRight: '10px' }}>Delete All</Button>
+        <Button variant="outline-secondary" onClick={handleBuy} style={{ marginRight: '10px' }}>Buy</Button>
+        {showAlert && <Alert variant="danger">Bạn chưa chọn sản phẩm để mua</Alert>}
+        <h1>Giỏ hàng</h1>
+        <div className="row">
+          {listCart.map((item) => (
+            <div key={item.product?.id} className="col-md-3 mb-4">
+              <div className="card">
+                <img 
+                  src={item.product?.image} 
+                  className="card-img-top" 
+                  alt={item.product?.name} 
+                  style={{ width: '100%', height: '400px', objectFit: 'cover' }} 
+                />
+                <div className="card-body">
+                  <h5 className="card-title">{item.product?.name}</h5>
+                  <p className="card-text">Price: {formatVND.format(Number(item.product?.price))}</p>
+                  <div className="d-flex align-items-center justify-content-between">
+                    <Button variant="outline-secondary" onClick={() => handleQuantityChange(item.product?.id!, -1)}disabled={item.quantity <= 1}>-</Button>
+                    <span className="mx-2">{item.quantity}</span>
+                    <Button variant="outline-secondary" style={{marginRight: '10px'}} onClick={() => handleQuantityChange(item.product?.id!, 1)}>+</Button>
+                    <Button 
+                      variant="outline-secondary" 
+                      onClick={() => handleDelete(item.product?.id!)}
+                    >
+                      Delete
+                    </Button>
+                    <div style={{ display: "flex", justifyContent: "flex-end", flexGrow: 1 }}>
+                      <input 
+                        type="checkbox" 
+                        style={{ transform: 'scale(2.5)' }} 
+                        onChange={() => handleCheckboxChange(item.product?.id!)}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
-        <p>Total current: {formatVND.format(totalCurrent)}</p>
-      </div>
-    </Container>
-
+          ))}
+          <p>Total current: {formatVND.format(totalCurrent)}</p>
+        </div>
+      </Container>
     </div>
   );
 };

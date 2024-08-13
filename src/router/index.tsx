@@ -7,7 +7,6 @@ import Heart from '../page/UserPage/wishlist'
 import ProtectedRouter from '../page/AdminPage/protectedRouter'
 import Product from '../page/UserPage/product'
 import FormContact from '../page/UserPage/fromContact'
-import ProductDetails from '../page/UserPage/productDetail'
 import Products from '../page/AdminPage/Products'
 import DashBoard from '../page/AdminPage/DashBoard'
 import UserAccount from '../page/AdminPage/userAccount'
@@ -17,6 +16,7 @@ import CategoryManager from '../page/AdminPage/CategoryManager'
 import ProductDetail from '../page/UserPage/productDetail'
 import Buy from '../page/UserPage/Buy'
 import HistoryProduct from '../page/AdminPage/HistoryProduct'
+import CustomerSurveyForm from '../page/UserPage/CustomerSurveyForm'
 
 
 
@@ -35,6 +35,7 @@ const Router = () => {
       <Route path="/productdetail/:id" element={<ProductDetail />} />
       <Route path='/formContact' element={<FormContact />} />
       <Route path='/buy' element={<Buy/>}></Route>
+      <Route path='/customerSuveyForm' element={<CustomerSurveyForm/>}></Route>
 
       {/*Đường dẫn user*/}
       {/* <Route path='/home' element={<Home />}>

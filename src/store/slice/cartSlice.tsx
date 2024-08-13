@@ -21,45 +21,54 @@ export const deleteAllCartItems: any = createAsyncThunk('cart/deleteAllCartItems
     await instance.delete(`users/${userId}/cart`);
     return userId;
 });
-// // Tổng số tiền của sản phẩm trongg giỏ hàng
-// export const totalPrice: any = createAsyncThunk('cart/totalPrice', async(price: number)=> {
-//     await instance.
-// })
+// tăng giảm số lượng sản phẩm trong giỏ hàng
+export const updateProductCart: any = createAsyncThunk('cart/updateProductCart', async ({ productId, quantity, userId }: { productId: number; quantity: number; userId: number }) => {
+      const response = await instance.put(`cart/${userId}/items/${productId}`, { quantity });
+      return response.data; 
+    }
+  );
+  
 
 
-const cartSlice = createSlice({
+  const cartSlice = createSlice({
     name: 'cart',
     initialState: {
-        isLoading: false,
-        error: "",
-        cart: [] as CartItem[],
+      isLoading: false,
+      error: "",
+      cart: [] as CartItem[],
     },
     reducers: {},
     extraReducers: (builder) => {
-
-
-        // Handle fetchAllCart
-        builder
-            .addCase(fetchAllCart.pending, (state) => {
-                state.isLoading = true;
-            })
-            .addCase(fetchAllCart.fulfilled, (state, action) => {
-                state.isLoading = false;
-                state.cart = action.payload.carts;
-            })
-            .addCase(fetchAllCart.rejected, (state, action) => {
-                state.isLoading = false;
-                state.error = action.error.message || 'Error fetching cart';
-            })
-            // Xóa 1 sản phẩm
-            .addCase(deleteCartItem.fulfilled, (state, action) => {
-                state.cart = state.cart.filter(item => item.productId !== action.payload);
-            })
-            // Xóa tất cả sản phẩm
-            .addCase(deleteAllCartItems.fulfilled, (state) => {
-                state.cart = [];
-            });
+      // Handle fetchAllCart
+      builder
+        .addCase(fetchAllCart.pending, (state) => {
+          state.isLoading = true;
+        })
+        .addCase(fetchAllCart.fulfilled, (state, action) => {
+          state.isLoading = false;
+          state.cart = action.payload.carts;
+        })
+        .addCase(fetchAllCart.rejected, (state, action) => {
+          state.isLoading = false;
+          state.error = action.error.message || 'Error fetching cart';
+        })
+        // Xóa 1 sản phẩm
+        .addCase(deleteCartItem.fulfilled, (state, action) => {
+          state.cart = state.cart.filter(item => item.productId !== action.payload);
+        })
+        // Xóa tất cả sản phẩm
+        .addCase(deleteAllCartItems.fulfilled, (state) => {
+          state.cart = [];
+        })
+        // Cập nhật số lượng sản phẩm
+        .addCase(updateProductCart.fulfilled, (state, action) => {
+          const updatedItem = action.payload;
+          state.cart = state.cart.map(item =>
+            item.productId === updatedItem.productId ? { ...item, quantity: updatedItem.quantity } : item
+          );
+        });
     }
-});
-
-export const { reducer } = cartSlice;
+  });
+  
+  export const { reducer } = cartSlice;
+  
