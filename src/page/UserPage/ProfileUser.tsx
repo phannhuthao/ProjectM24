@@ -28,7 +28,7 @@ const ProfileUser = () => {
       setFormData({
         fullName: userInfo.fullName || '',
         email: userInfo.email || '',
-        password: '', // Keep password empty initially
+        password: '', 
         phone: userInfo.phone || '',
         birthday: userInfo.birthday || ''
       });

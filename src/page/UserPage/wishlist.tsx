@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { ProductType } from '../../confirg/interface';
-import { fetchAllWishList } from '../../store/slice/wishlistSlice';
+import { fetchAllWishList, updateWishlist } from '../../store/slice/wishlistSlice';
 import { fetchAllProduct } from '../../store/slice/productSlice';
 
 
@@ -28,30 +28,29 @@ export const formatVND = new Intl.NumberFormat('vi-VN', {
 });
 
 const Wishlist = () => {
-  const {wishlist} = useSelector((state: RootState) => state.wishlist); 
-  const {products} = useSelector((state: RootState) => state.product); 
-  const {userLogin} = useSelector((state: RootState) => state.user); 
+  const { wishlist } = useSelector((state: RootState) => state.wishlist);
+  const { products } = useSelector((state: RootState) => state.product);
+  const { userLogin } = useSelector((state: RootState) => state.user);
 
   const dispatch = useDispatch();
-console.log(wishlist);
+  console.log(wishlist);
 
-  const list  = useMemo(()=>{
-    return wishlist.map(item=>products.find(p=>p.id==item)) 
-  },[wishlist,products])
-console.log(list);
+  const list = useMemo(() => {
+    return wishlist.map(item => products.find(p => p.id == item))
+  }, [wishlist, products])
+  console.log(list);
 
 
   const handleDeleteOneProduct = (id: number) => {
-   
+    let newWishList = wishlist.filter(item=> item != id)
+    dispatch(updateWishlist({userId: userLogin?.id, wishlist: newWishList}))
   };
 
-  const handleDeleteAll = () => {
-   
-  };
-  useEffect(()=>{
+
+  useEffect(() => {
     dispatch(fetchAllWishList(userLogin?.id))
     dispatch(fetchAllProduct())
-  },[])
+  }, [])
 
   return (
     <div className="d-flex flex-column min-vh-100">
@@ -102,13 +101,12 @@ console.log(list);
       </Navbar>
 
       <Container className="my-4">
-        <Button variant="outline-secondary" onClick={handleDeleteAll}>Delete All</Button>
         <h1>Yêu thích</h1>
         <div className="row">
           {wishlist.length === 0 ? (
             <p>No items in wishlist</p>
           ) : (
-            list.map((item) => ( item &&
+            list.map((item) => (item &&
               <div key={item.id} className="col-md-3 mb-4">
                 <div className="card">
                   <img src={item.image} className="card-img-top" alt={item.name} style={{ width: '100%', height: '400px', objectFit: 'cover' }} />

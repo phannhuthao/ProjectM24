@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, ProgressBar } from 'react-bootstrap';
 import { FaUsers, FaBox, FaTags, FaDollarSign } from 'react-icons/fa';
-import { Bar } from 'react-chartjs-2';
+import { Bar, Pie } from 'react-chartjs-2';
 import 'chart.js/auto';
 
 const DashBoard = () => {
@@ -20,7 +20,7 @@ const DashBoard = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const data = {
+  const barData = {
     labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
     datasets: [
       {
@@ -47,12 +47,32 @@ const DashBoard = () => {
     ],
   };
 
-  const options = {
+  const barOptions = {
     scales: {
       y: {
         beginAtZero: true,
       },
     },
+  };
+
+  const pieDataLogin = {
+    labels: ['User A', 'User B', 'User C'],
+    datasets: [
+      {
+        data: [300, 500, 200],
+        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+      },
+    ],
+  };
+
+  const pieDataSales = {
+    labels: ['Samsung', 'iPhone', 'Oppo'],
+    datasets: [
+      {
+        data: [45, 55, 30],
+        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+      },
+    ],
   };
 
   const cardTitleStyle = {
@@ -196,7 +216,10 @@ const DashBoard = () => {
             onMouseLeave={handleMouseLeave}
           >
             <Card.Body>
-              <Card.Text style={cardTextStyle}>Text</Card.Text>
+              <Card.Text style={cardTextStyle}>Biểu đồ hình tròn số lượng người đăng nhập trong ngày</Card.Text>
+              <div style={{ width: '250px', height: '250px', margin: 'auto' }}>
+                <Pie data={pieDataLogin} />
+              </div>
             </Card.Body>
           </Card>
         </Col>
@@ -207,7 +230,8 @@ const DashBoard = () => {
             onMouseLeave={handleMouseLeave}
           >
             <Card.Body>
-              <Card.Text style={cardTextStyle}>Text</Card.Text>
+              <Card.Text style={cardTextStyle}>Biểu đồ hình tròn số lượng sản phẩm bán trong ngày</Card.Text>
+              <Pie data={pieDataSales} />
             </Card.Body>
           </Card>
         </Col>
@@ -219,7 +243,7 @@ const DashBoard = () => {
           <Card className="text-center shadow-sm">
             <Card.Body>
               {/* Render the bar chart */}
-              <Bar data={data} options={options} />
+              <Bar data={barData} options={barOptions} />
             </Card.Body>
           </Card>
         </Col>

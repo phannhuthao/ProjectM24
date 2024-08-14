@@ -1,8 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { instance } from "../../service";
 import { CartItem } from "../../confirg/interface";
-import Wishlist from "../../page/UserPage/wishlist";
-
 
 
 export const fetchAllCart: any = createAsyncThunk('cart/fetchAllCart', async (userId: number) => {

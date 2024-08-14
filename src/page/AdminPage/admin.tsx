@@ -47,7 +47,7 @@ const Admin: React.FC = () => {
 
   const logOut = () => {
     console.log('User logged out');
-    navigate('/login'); // chuyển sang trang login
+    navigate('/login'); 
   };
 
   return (

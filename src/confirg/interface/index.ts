@@ -11,7 +11,8 @@ export type UserType = {
     "id": number,
     "role": string
     "cart": CartItem[],
-    "wishlist": number[]
+    "wishlist": number[],
+    "comment": string[]
 }
 
 

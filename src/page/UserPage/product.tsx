@@ -60,39 +60,36 @@ const Product = () => {
     }, []);
 
     const addToCart = (productId: number) => {
-        // nếu như cái productId đã tồn tại trong giỏ hàng thì tăng số lượng lên 1 nếu không thì cartItem mới với số lượng quantity ban đầu bằng 1
-
-        let index = cart.findIndex((item) => item.productId === productId)
-        if (index == -1) {
-            // chưa có sản n=phẩm thì tạo mới 1 cart item
-            let cartItem = { productId: productId, quantity: 1 }
+        let index = cart.findIndex((item) => item.productId === productId);
+        if (index === -1) {
+            let cartItem = { productId: productId, quantity: 1 };
             instance.patch(`/users/${userLogin?.id}`, { carts: [...cart, cartItem] });
+            alert('Sản phẩm đã được thêm vào giỏ hàng');
         } else {
             let newCart = cart.map((item, i) => {
                 if (i === index) {
-                    return { ...item, quantity: item.quantity + 1 }
+                    return { ...item, quantity: item.quantity + 1 };
                 }
                 return item;
-            })
+            });
             instance.patch(`/users/${userLogin?.id}`, { carts: [...newCart] });
+            alert('Sản phẩm đã được thêm vào giỏ hàng');
         }
-        dispatch(fetchAllCart(userLogin?.id))
-    }
+        dispatch(fetchAllCart(userLogin?.id));
+    };
+    
 
     const addToWishlist = (productId: number) => {
-        let checkExist = wishlist.some(item=>item === productId)
-        console.log(productId);
-        console.log(checkExist);
-        
-        
-        if(checkExist){
-
-        }else{
-            let newWishList = [...wishlist,productId];
-            dispatch(updateWishlist({userId: userLogin?.id, wishlist : newWishList}))
+        let checkExist = wishlist.some(item => item === productId);
+        if (checkExist) {
+            alert('Sản phẩm đã có trong danh sách yêu thích');
+        } else {
+            let newWishList = [...wishlist, productId];
+            dispatch(updateWishlist({ userId: userLogin?.id, wishlist: newWishList }));
+            alert('Sản phẩm đã được thêm vào phần yêu thích');
         }
-
     };
+    
 
     const navigate = useNavigate();
 

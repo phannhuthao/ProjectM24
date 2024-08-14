@@ -10,7 +10,7 @@ export const updateWishlist: any = createAsyncThunk('wishlist/delete', async ({ 
     const res = await instance.patch(`users/${userId}`, { wishlist });
     return res.data.wishlist;
   }
-  );
+);
   
   // xóa tất cả sản phẩm yêu thích
   export const deleteAllWishlistItem: any = createAsyncThunk('wishlist/deleteAll', async (userId: number) => {

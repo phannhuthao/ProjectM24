@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button, Container, Navbar, Nav, Form, Alert, NavDropdown } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBagShopping, faHeart, faDoorClosed, faUser } from '@fortawesome/free-solid-svg-icons';
@@ -8,7 +8,7 @@ import { RootState } from '../../store';
 import { fetchAllCart, deleteCartItem, deleteAllCartItems, updateProductCart } from '../../store/slice/cartSlice';
 import { fetchAllProduct } from '../../store/slice/productSlice';
 import { ProductType } from '../../confirg/interface';
-import { useLocation } from 'react-router-dom';
+
 
 export const formatVND = new Intl.NumberFormat('vi-VN', {
   style: 'currency',
@@ -51,6 +51,8 @@ const Carts = () => {
     let newCart = cart.filter(item=>item.productId !== cartItemId)
     dispatch(deleteCartItem({userId: userLogin?.id,carts : newCart}));
   };
+
+  
 
   const handleDeleteAll = () => {
     if (userLogin) {

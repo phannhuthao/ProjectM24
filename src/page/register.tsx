@@ -132,7 +132,7 @@ const Register = () => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ ...registerForm, carts: [], wishlist: [] }),
+      body: JSON.stringify({ ...registerForm, carts: [], wishlist: [], comment: [] }),
     })
       .then(() => {
         navigate('/login');

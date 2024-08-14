@@ -18,12 +18,12 @@ const initialState: UserState = {
   userLogin: null,
   userInfo: null
 };
-
+// đăng kí
 export const registerUser: any = createAsyncThunk('user/register', async (data: any) => {
   const res = await instance.post("register", data);
   return res.data;
 });
-
+// đăng nhập
 export const loginUser: any = createAsyncThunk('user/login', async (data: { email: string; password: string }) => {
   return loginApi(data);
 });
@@ -34,9 +34,9 @@ export const fetchUser : any= createAsyncThunk('user/fetchUser', async () => {
   return res.data;
 });
 
+// sửa
 export const updateUser: any = createAsyncThunk('user/update', async (data: UserType) => {
-  const id = localStorage.getItem("userId") || '';
-  const res = await instance.put(`/users/${id}`, data);
+  const res = await instance.put('users', data);
   return res.data;
 });
 
@@ -93,7 +93,6 @@ const userSlice = createSlice({
       .addCase(updateUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.userInfo = action.payload;
-        localStorage.setItem('userId', action.payload.id);
       })
       .addCase(updateUser.rejected, (state, action) => {
         state.isLoading = false;

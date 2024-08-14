@@ -1,5 +1,5 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Button, Container, Form, Navbar, Nav, NavDropdown } from 'react-bootstrap';
+import { Button, Container, Form, Navbar, Nav, NavDropdown, Modal } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBagShopping, faHeart, faDoorClosed, faUser } from '@fortawesome/free-solid-svg-icons';
 import React, { useEffect, useState } from 'react';
@@ -10,7 +10,7 @@ import { RootState } from '../../store';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAllCart } from '../../store/slice/cartSlice';
 import { instance } from '../../service';
-
+import { updateWishlist } from '../../store/slice/wishlistSlice';
 
 // Định dạng tiền tệ Việt Nam
 export const formatVND = new Intl.NumberFormat('vi-VN', {
@@ -32,8 +32,11 @@ const HomePage = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [cartCount, setCartCount] = useState<number>(0);
   const { cart } = useSelector((state: RootState) => state.cart);
+  const {wishlist} = useSelector((state: RootState) => state.wishlist); 
   const { userLogin } = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -46,39 +49,47 @@ const HomePage = () => {
     };
     fetchProducts();
     if (userLogin) {
-      dispatch(fetchAllCart(userLogin.id))
+      dispatch(fetchAllCart(userLogin.id));
     }
-  }, []);
-
-  const navigate = useNavigate(); 
-
-  const handleLogout = () => {
-    const confirmLogout = window.confirm('Bạn có muốn đăng xuất không');
-    if (confirmLogout) {
-      localStorage.removeItem('user'); 
-      navigate('/login'); 
-    }
-  };
+  }, [userLogin, dispatch]);
 
   const addToCart = (productId: number) => {
-    // nếu như cái productId đã tồn tại trong giỏ hàng thì tăng số lượng lên 1 nếu không thì cartItem mới với số lượng quantity ban đầu bằng 1
-
-    let index = cart.findIndex((item)=> item.productId === productId)
-    if(index == -1) {
-      // chưa có sản n=phẩm thì tạo mới 1 cart item
-      let cartItem = {productId: productId, quantity: 1}
-      instance.patch(`/users/${userLogin?.id}`, {carts:[...cart, cartItem]});
+    let index = cart.findIndex((item) => item.productId === productId);
+    if (index === -1) {
+        let cartItem = { productId: productId, quantity: 1 };
+        instance.patch(`/users/${userLogin?.id}`, { carts: [...cart, cartItem] });
+        alert('Sản phẩm đã được thêm vào giỏ hàng');
     } else {
-      let newCart = cart.map((item,i)=>{
-        if (i===index){
-          return {...item,quantity:item.quantity+1}
-        }
-        return item;
-      })      
-      instance.patch(`/users/${userLogin?.id}`, {carts:[...newCart]});
+        let newCart = cart.map((item, i) => {
+            if (i === index) {
+                return { ...item, quantity: item.quantity + 1 };
+            }
+            return item;
+        });
+        instance.patch(`/users/${userLogin?.id}`, { carts: [...newCart] });
+        alert('Sản phẩm đã được thêm vào giỏ hàng');
     }
-    dispatch(fetchAllCart(userLogin?.id))
+    dispatch(fetchAllCart(userLogin?.id));
+};
+
+const addToWishlist = (productId: number) => {
+  let checkExist = wishlist.some(item => item === productId);
+  if (checkExist) {
+      alert('Sản phẩm đã có trong danh sách yêu thích');
+  } else {
+      let newWishList = [...wishlist, productId];
+      dispatch(updateWishlist({ userId: userLogin?.id, wishlist: newWishList }));
+      alert('Sản phẩm đã được thêm vào phần yêu thích');
   }
+};
+
+const logOut = () => {
+  console.log('User logged out');
+  navigate('/login'); 
+};
+
+
+  
 
   const ProductList = ({ products, title }: { products: Product[], title: string }) => (
     <>
@@ -96,9 +107,9 @@ const HomePage = () => {
                   <p className="card-text">Price: {formatVND.format(Number(product.price))}</p>
                   <Button variant="outline-secondary" style={{ marginRight: '10px' }} onClick={() => addToCart(product.id)}>Buy</Button>
                   <Button variant="outline-secondary" style={{ marginRight: '10px' }} onClick={() => addToCart(product.id)}>Add to Cart</Button>
-                  <Button variant="outline-secondary" style={{ marginRight: '10px' }}>
-                      <FontAwesomeIcon icon={faHeart} size="lg" />
-                 </Button>
+                  <Button variant="outline-secondary" style={{ marginRight: '10px' }} onClick={()=> addToWishlist(product.id)}>
+                    <FontAwesomeIcon icon={faHeart} size="lg" />
+                  </Button>
                 </div>
               </div>
             </div>
@@ -107,7 +118,6 @@ const HomePage = () => {
       </div>
     </>
   );
-
 
   const contentStyle: React.CSSProperties = {
     height: '380px',
@@ -156,14 +166,14 @@ const HomePage = () => {
                 </Link>
               </Nav.Link>
 
-              <Nav.Link href="#" style={{ color: "gray" }} className="d-flex align-items-center ms-3">
+              <Nav.Link href="#"  className="d-flex align-items-center ms-3">
                 <Link to={'/heart'}>
                   <FontAwesomeIcon icon={faHeart} size="lg" />
                 </Link>
               </Nav.Link>
 
-              <Nav.Link href="#" style={{ color: "gray" }} className="d-flex align-items-center ms-3" onClick={handleLogout}>
-                <FontAwesomeIcon icon={faDoorClosed} size="lg" />
+              <Nav.Link href="#"className="d-flex align-items-center ms-3">
+                <FontAwesomeIcon icon={faDoorClosed} size="lg" onClick={()=> logOut}  />
               </Nav.Link>
 
               <Nav.Link href="#" style={{ color: "gray" }} className="d-flex align-items-center ms-3">
@@ -171,8 +181,6 @@ const HomePage = () => {
                   <FontAwesomeIcon icon={faUser} size="lg" />
                 </Link>
               </Nav.Link>
-
-
             </Nav>
           </Navbar.Collapse>
         </Container>
@@ -221,7 +229,6 @@ const HomePage = () => {
 
       <ProductList products={products.slice(0, 4)} title="Sản phẩm bán chạy" />
 
-
       <footer className="page-footer bg-dark text-white font-small blue pt-4 mt-auto">
         <div className="container-fluid text-center text-md-left">
           <div className="row">
@@ -259,6 +266,8 @@ const HomePage = () => {
           </div>
         </div>
       </footer>
+
+      
     </div>
   );
 };

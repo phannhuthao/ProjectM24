@@ -15,7 +15,7 @@ export const deleteUser: any = createAsyncThunk('account/delete', async (userId:
 
 // sửa
 export const updateUser: any = createAsyncThunk('account/edit', async() => {
-    const response = await instance.put('/users');
+    const response = await instance.patch('/users');
     return response.data;
 })
 
