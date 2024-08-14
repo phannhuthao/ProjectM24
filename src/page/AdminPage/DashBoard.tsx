@@ -1,10 +1,25 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, ProgressBar } from 'react-bootstrap';
 import { FaUsers, FaBox, FaTags, FaDollarSign } from 'react-icons/fa';
 import { Bar } from 'react-chartjs-2';
 import 'chart.js/auto';
 
 const DashBoard = () => {
+  const [colors, setColors] = useState(['text-primary', 'text-success', 'text-warning']);
+
+  useEffect(() => {
+    // Cycle through colors on load
+    const interval = setInterval(() => {
+      setColors(prevColors => [
+        prevColors[2],
+        prevColors[0],
+        prevColors[1]
+      ]);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   const data = {
     labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
     datasets: [
@@ -136,10 +151,10 @@ const DashBoard = () => {
             onMouseLeave={handleMouseLeave}
           >
             <Card.Body>
-            <Card.Text style={cardTextStyle}>Loại sản phẩm</Card.Text>
-              <Card.Text style={cardTextStyle}>Samsung</Card.Text>
-              <Card.Text style={cardTextStyle}>iPhone</Card.Text>
-              <Card.Text style={cardTextStyle}>Oppo</Card.Text>
+              <Card.Text style={cardTextStyle}>Loại sản phẩm</Card.Text>
+              <Card.Text className={colors[0]}>Samsung</Card.Text>
+              <Card.Text className={colors[1]}>iPhone</Card.Text>
+              <Card.Text className={colors[2]}>Oppo</Card.Text>
             </Card.Body>
           </Card>
         </Col>
@@ -151,9 +166,9 @@ const DashBoard = () => {
           >
             <Card.Body>
               <Card.Text style={cardTextStyle}>Sản phẩm bán chạy</Card.Text>
-              <Card.Text style={cardTextStyle}>iPhone 15 Pro</Card.Text>
-              <Card.Text style={cardTextStyle}>Samsung Galaxy S24 Ultra</Card.Text>
-              <Card.Text style={cardTextStyle}>Oppo A58</Card.Text>
+              <Card.Text className={colors[0]}>iPhone 15 Pro</Card.Text>
+              <Card.Text className={colors[1]}>Samsung Galaxy S24 Ultra</Card.Text>
+              <Card.Text className={colors[2]}>Oppo A58</Card.Text>
             </Card.Body>
           </Card>
         </Col>
@@ -165,9 +180,9 @@ const DashBoard = () => {
           >
             <Card.Body>
               <Card.Text style={cardTextStyle}>Doanh thu đã bán</Card.Text>
-              <Card.Text style={cardTextStyle}>Text</Card.Text>
-              <Card.Text style={cardTextStyle}>Text</Card.Text>
-              <Card.Text style={cardTextStyle}>Text</Card.Text>
+              <Card.Text className={colors[0]}>Samsung <p>5</p></Card.Text>
+              <Card.Text className={colors[1]}>iPhone <p>10</p></Card.Text>
+              <Card.Text className={colors[2]}>Oppo <p>15</p></Card.Text>
             </Card.Body>
           </Card>
         </Col>

@@ -5,6 +5,7 @@ import { reducer as user  } from "../store/slice/userSlice";
 import { reducer as product  } from "../store/slice/productSlice";
 import { reducer as account} from "./slice/accountslice";
 import { reducer as cart } from "./slice/cartSlice";
+import { reducer as wishlist } from "./slice/wishlistSlice";
 
 
 export const store = configureStore({
@@ -12,7 +13,8 @@ export const store = configureStore({
         user : user,
         product: product,
         account: account,
-        cart : cart
+        cart : cart,
+        wishlist: wishlist,
     }
 })
 

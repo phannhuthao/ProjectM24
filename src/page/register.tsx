@@ -4,6 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { registerUser } from "../store/slice/userSlice";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
+import Wishlist from "./UserPage/wishlist";
 
 const initStateForm = {
   email: "",
@@ -12,8 +13,8 @@ const initStateForm = {
   fullName: "",
   phone: "",
   birthday: "",
-  status: "", 
-  role: "",  
+  status: "",
+  role: "",
 };
 
 const initErrorForm = {
@@ -23,7 +24,7 @@ const initErrorForm = {
   fullName: "",
   phone: "",
   birthday: "",
-  status: "", 
+  status: "",
   role: "",
 };
 
@@ -87,6 +88,14 @@ const Register = () => {
       setError(prev => ({ ...prev, fullName: "Tên không được để trống" }));
       return;
     }
+    // New validation for special characters in fullName
+    if (/[^a-zA-Z\s]/.test(registerForm.fullName)) {
+      setError(prev => ({
+        ...prev,
+        fullName: "Tên không được có kí hiệu đặc biệt",
+      }));
+      return;
+    }
     setError(prev => ({ ...prev, fullName: "" }));
 
     if (!registerForm.phone.trim()) {
@@ -96,10 +105,11 @@ const Register = () => {
       }));
       return;
     }
+    // New validation for special characters in phone
     if (!/^\d{10,11}$/.test(registerForm.phone)) {
       setError(prev => ({
         ...prev,
-        phone: "Số điện thoại không hợp lệ, phải có 10-11 chữ số",
+        phone: "Số điện thoại không hợp lệ, phải có 10-11 chữ số và không có ký hiệu đặc biệt",
       }));
       return;
     }
@@ -114,17 +124,19 @@ const Register = () => {
     }
     setError(prev => ({ ...prev, birthday: "" }));
 
+
     // Register user
+    // Register user with carts and wishlist arrays
     fetch("http://localhost:9999/users", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({...registerForm, carts: []}),
+      body: JSON.stringify({ ...registerForm, carts: [], wishlist: [] }),
     })
-    .then(()=> {
-      navigate('/login');
-    })
+      .then(() => {
+        navigate('/login');
+      })
   };
 
   return (

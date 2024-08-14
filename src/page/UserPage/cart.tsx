@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Button, Container, Navbar, Nav, Form, Alert } from 'react-bootstrap';
+import { Button, Container, Navbar, Nav, Form, Alert, NavDropdown } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBagShopping, faHeart, faDoorClosed, faUser } from '@fortawesome/free-solid-svg-icons';
 import { Link, useNavigate } from 'react-router-dom';
@@ -7,6 +7,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { fetchAllCart, deleteCartItem, deleteAllCartItems, updateProductCart } from '../../store/slice/cartSlice';
 import { fetchAllProduct } from '../../store/slice/productSlice';
+import { ProductType } from '../../confirg/interface';
+import { useLocation } from 'react-router-dom';
 
 export const formatVND = new Intl.NumberFormat('vi-VN', {
   style: 'currency',
@@ -34,7 +36,7 @@ const Carts = () => {
     }
   }, [userLogin, dispatch, navigate]);
 
-  const listCart = useMemo(() => {
+  const listCart: Array<{product:ProductType|undefined, quantity: number}> = useMemo(() => {
     return cart.map((c) => {
       return {
         product: products.find(p => p.id === c.productId),
@@ -43,8 +45,11 @@ const Carts = () => {
     });
   }, [cart, products]);
 
-  const handleDelete = (cartItemId: number) => {
-    dispatch(deleteCartItem(cartItemId));
+  const handleDelete = (cartItemId: number | undefined) => {
+    console.log(cartItemId);
+    
+    let newCart = cart.filter(item=>item.productId !== cartItemId)
+    dispatch(deleteCartItem({userId: userLogin?.id,carts : newCart}));
   };
 
   const handleDeleteAll = () => {
@@ -62,14 +67,27 @@ const Carts = () => {
   };
 
   const handleQuantityChange = (productId: number, change: number) => {
-    const item = listCart.find(item => item.product?.id === productId);
-    if (item) {
-      const newQuantity = item.quantity + change;
-      if (newQuantity > 0) {
-        dispatch(updateProductCart({ productId, quantity: newQuantity, userId: userLogin?.id! }));
+    const newCart = cart.map((item)=>{
+      if(item.productId === productId){
+        return {productId : item.productId, quantity : item.quantity+ change}
       }
-    }
+      return item;
+    })
+    dispatch(updateProductCart({userId: userLogin?.id, cart : newCart}))
   };
+
+ 
+
+
+   const handleBuy = () => {
+  if (selectedItems.length === 0) {
+    setShowAlert(true);
+  } else {
+    setShowAlert(false);
+    navigate('/buy', { state: { selectedItems, cart: listCart } }); // Pass selected items and cart data to the buy page
+  }
+};
+
 
   const totalCurrent = listCart.reduce((total, item) => {
     const productId = item.product?.id;
@@ -82,33 +100,28 @@ const Carts = () => {
     return total;
   }, 0);
 
-  const handleBuy = () => {
-    if (selectedItems.length === 0) {
-      setShowAlert(true);
-    } else {
-      setShowAlert(false);
-      // Handle the buy logic here
-    }
-  };
 
   return (
     <div className="d-flex flex-column min-vh-100">
-      <Navbar expand="lg" className="bg-body-tertiary">
-        <Container fluid>
-          <Navbar.Brand>
-            <Link to={'/home'} style={{ textDecoration: 'none', color: 'black' }}>EYYO</Link>
-          </Navbar.Brand>
-          <Navbar.Toggle aria-controls="navbarScroll" />
-          <Navbar.Collapse id="navbarScroll">
-            <Nav className="me-auto my-2 my-lg-0 d-flex justify-content-between w-100" navbarScroll>
-              <div className="d-flex">
-                <Nav.Link href="#" className="mx-2">
-                  <Link to={'/product'} style={{ textDecoration: 'none', color: 'black' }}>Product</Link>
-                </Nav.Link>
-                <Nav.Link href="#action2" className="mx-2">
-                  <Link to={'/formContact'} style={{ textDecoration: 'none', color: 'black' }}>Form Contact</Link>
-                </Nav.Link>
-              </div>
+    <Navbar expand="lg" className="bg-body-tertiary">
+      <Container fluid>
+        <Navbar.Brand>
+          <Link to={'/home'} style={{ textDecoration: 'none', color: 'black' }}>EYYO</Link>
+        </Navbar.Brand>
+        <Navbar.Toggle aria-controls="navbarScroll" />
+        <Navbar.Collapse id="navbarScroll">
+          <Nav className="me-auto my-2 my-lg-0 d-flex justify-content-between w-100" navbarScroll>
+            <div className="d-flex">
+              <Nav.Link href="#" className="mx-2">
+                <Link to={'/product'} style={{ textDecoration: 'none', color: 'black' }}>Product</Link>
+              </Nav.Link>
+              <NavDropdown title="Form" id="navbarScrollingDropdown" className="mx-2">
+                <NavDropdown.Item href="#"> <Link to={'/formContact'} style={{ textDecoration: 'none', color: 'black' }}>Form Contact</Link></NavDropdown.Item>
+                <NavDropdown.Item href="#"> <Link to={'/customerSuveyForm'} style={{ textDecoration: 'none', color: 'black' }}>Customer Survey Form</Link></NavDropdown.Item>
+                <NavDropdown.Divider />
+                <NavDropdown.Item href="#action5">Something selection here</NavDropdown.Item>
+              </NavDropdown>
+            </div>
               <Form className="d-flex mx-auto">
                 <Form.Control
                   type="search"
@@ -161,12 +174,7 @@ const Carts = () => {
                     <Button variant="outline-secondary" onClick={() => handleQuantityChange(item.product?.id!, -1)}disabled={item.quantity <= 1}>-</Button>
                     <span className="mx-2">{item.quantity}</span>
                     <Button variant="outline-secondary" style={{marginRight: '10px'}} onClick={() => handleQuantityChange(item.product?.id!, 1)}>+</Button>
-                    <Button 
-                      variant="outline-secondary" 
-                      onClick={() => handleDelete(item.product?.id!)}
-                    >
-                      Delete
-                    </Button>
+                    <Button variant="outline-secondary" onClick={() => handleDelete(item.product?.id)}>Delete</Button>
                     <div style={{ display: "flex", justifyContent: "flex-end", flexGrow: 1 }}>
                       <input 
                         type="checkbox" 

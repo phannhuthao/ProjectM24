@@ -10,6 +10,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { instance } from '../../service';
 import { fetchAllCart } from '../../store/slice/cartSlice';
+import Item from 'antd/es/list/Item';
+import { fetchAllWishList, updateWishlist } from '../../store/slice/wishlistSlice';
 
 export const formatVND = new Intl.NumberFormat('vi-VN', {
     style: 'currency',
@@ -28,17 +30,7 @@ interface Product {
 
 
 
-//   const addToWishlist = (product: Product) => {
-//     let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-//     const existingProductIndex = wishlist.findIndex((item: Product) => item.id === product.id);
 
-//     if (existingProductIndex === -1) {
-//       wishlist.push(product);
-//     }
-
-//     localStorage.setItem('wishlist', JSON.stringify(wishlist));
-//     alert('Sản phẩm đã được thêm vào phần yêu thích');
-//   };
 const Product = () => {
     const [products, setProducts] = useState<Product[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -47,6 +39,7 @@ const Product = () => {
     const [sortOrder, setSortOrder] = useState(''); // Trạng thái lưu chọn lọc theo giá
     const itemsPerPage = 8;
     const { cart } = useSelector((state: RootState) => state.cart);
+    const {wishlist} = useSelector((state: RootState) => state.wishlist); 
     const { userLogin } = useSelector((state: RootState) => state.user);
     const dispatch = useDispatch();
 
@@ -60,8 +53,10 @@ const Product = () => {
                 console.error('Error fetching products:', error);
             }
         };
+        
 
         fetchProducts();
+        dispatch(fetchAllWishList(userLogin?.id));
     }, []);
 
     const addToCart = (productId: number) => {
@@ -83,6 +78,21 @@ const Product = () => {
         }
         dispatch(fetchAllCart(userLogin?.id))
     }
+
+    const addToWishlist = (productId: number) => {
+        let checkExist = wishlist.some(item=>item === productId)
+        console.log(productId);
+        console.log(checkExist);
+        
+        
+        if(checkExist){
+
+        }else{
+            let newWishList = [...wishlist,productId];
+            dispatch(updateWishlist({userId: userLogin?.id, wishlist : newWishList}))
+        }
+
+    };
 
     const navigate = useNavigate();
 
@@ -110,7 +120,7 @@ const Product = () => {
                                     <p className="card-text">Price: {formatVND.format(Number(product.price))}</p>
                                     <Button variant="outline-secondary" style={{ marginRight: '10px' }}>Buy</Button>
                                     <Button variant="outline-secondary" style={{ marginRight: '10px' }} onClick={() => addToCart(product.id)}>Add to Cart</Button>
-                                    <Button variant="outline-secondary" style={{ marginRight: '10px' }}>
+                                    <Button variant="outline-secondary" style={{ marginRight: '10px' }} onClick={()=>  addToWishlist(product.id)}>
                                         <FontAwesomeIcon icon={faHeart} size="lg" />
                                     </Button>
                                 </div>

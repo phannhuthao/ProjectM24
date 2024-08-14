@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { fetchAllUsers, updateUserRole, deleteUser, updateUser, addUser } from '../../store/slice/accountslice'; // Import addUser
+import { fetchAllUsers, updateUserRole, deleteUser, updateUser, addUser } from '../../store/slice/accountslice';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { Button, Spinner, Table, Modal, Form } from 'react-bootstrap';
@@ -18,11 +18,27 @@ export default function Products() {
     birthday: '',
     password: ''
   });
-  const [errors, setErrors] = useState<any>({}); // Để lưu thông báo lỗi
+  const [errors, setErrors] = useState<any>({});
+  const [sortedAccounts, setSortedAccounts] = useState(accounts);
+  const [sortOrder, setSortOrder] = useState('');
 
   useEffect(() => {
     dispatch(fetchAllUsers());
   }, [dispatch]);
+
+  useEffect(() => {
+    handleSort(sortOrder);
+  }, [accounts, sortOrder]);
+
+  const handleSort = (order: string) => {
+    let sorted = [...accounts];
+    if (order === 'ascending') {
+      sorted.sort((a, b) => a.fullName.localeCompare(b.fullName));
+    } else if (order === 'descending') {
+      sorted.sort((a, b) => b.fullName.localeCompare(a.fullName));
+    }
+    setSortedAccounts(sorted);
+  };
 
   const handleRoleChange = (userId: number, newRole: boolean) => {
     dispatch(updateUserRole({ userId, role: newRole }));
@@ -40,37 +56,31 @@ export default function Products() {
     setShowEditModal(true);
   };
 
-  // Hàm kiểm tra lỗi
   const validateForm = () => {
     const newErrors: any = {};
 
-    // Kiểm tra lỗi email
     if (!formData.email.trim()) {
       newErrors.email = "Email không được để trống";
     } else if (!formData.email.toLowerCase().match(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)) {
       newErrors.email = "Email không đúng định dạng, mời bạn nhập lại";
     }
 
-    // Kiểm tra lỗi mật khẩu
     if (!formData.password.trim()) {
       newErrors.password = "Password không được để trống";
     } else if (formData.password.length < 6) {
       newErrors.password = "Password phải có ít nhất 6 kí tự";
     }
 
-    // Kiểm tra lỗi tên đầy đủ
     if (!formData.fullName.trim()) {
       newErrors.fullName = "Tên không được để trống";
     }
 
-    // Kiểm tra lỗi số điện thoại
     if (!formData.phone.trim()) {
       newErrors.phone = "Số điện thoại không được để trống";
     } else if (!/^\d{10,11}$/.test(formData.phone)) {
       newErrors.phone = "Số điện thoại không hợp lệ, phải có 10-11 chữ số";
     }
 
-    // Kiểm tra lỗi ngày sinh
     if (!formData.birthday.trim()) {
       newErrors.birthday = "Ngày sinh không được để trống";
     }
@@ -79,7 +89,6 @@ export default function Products() {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Lưu thông tin đã sửa
   const handleSaveEditUser = async () => {
     if (!validateForm()) return;
 
@@ -87,19 +96,15 @@ export default function Products() {
       const updatedUserData = { ...formData };
       const userId = selectedUser.id;
 
-      // Gửi request để cập nhật user
       await dispatch(updateUser({ userId, updatedUserData })).unwrap();
 
-      // Lưu dữ liệu vào localStorage
       const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
       const updatedUsers = storedUsers.map((user: any) =>
         user.id === userId ? { ...user, ...updatedUserData } : user
       );
       localStorage.setItem('users', JSON.stringify(updatedUsers));
 
-      // Đóng modal
       setShowEditModal(false);
-      // Refresh danh sách người dùng
       dispatch(fetchAllUsers());
 
     } catch (error) {
@@ -107,13 +112,9 @@ export default function Products() {
     }
   };
 
-
-  // Xóa người dùng
   const handleDeleteUser = async (userId: number) => {
     try {
-      // Gửi request để xóa user
       await dispatch(deleteUser(userId)).unwrap();
-      // Refresh danh sách người dùng
       dispatch(fetchAllUsers());
     } catch (error) {
       console.error("Lỗi không thể xóa user ", error);
@@ -126,16 +127,13 @@ export default function Products() {
     try {
       const newUser = { id: Date.now(), ...formData, role: false };
 
-      // Gửi request để thêm user
       await dispatch(addUser(newUser)).unwrap();
 
-      // Lưu dữ liệu vào localStorage
       const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
       storedUsers.push(newUser);
       localStorage.setItem('users', JSON.stringify(storedUsers));
 
       setShowAddModal(false);
-
       dispatch(fetchAllUsers());
 
     } catch (error) {
@@ -143,13 +141,16 @@ export default function Products() {
     }
   };
 
-  
-
   return (
     <div>
       <h1>Trang quản lí người dùng</h1>
 
       <div className="d-flex justify-content-end align-items-center mb-3">
+        <select id="sort-order" className="me-3" onChange={(e) => setSortOrder(e.target.value)}>
+          <option value="">Chọn sắp xếp</option>
+          <option value="ascending">A đến Z</option>
+          <option value="descending">Z đến A</option>
+        </select>
         <Button variant="primary" onClick={() => setShowAddModal(true)} className="me-2">Add User</Button>
       </div>
 
@@ -168,9 +169,9 @@ export default function Products() {
           </tr>
         </thead>
         <tbody>
-          {accounts.map((user) => (
+          {sortedAccounts.map((user, index) => (
             <tr key={user.id}>
-              <td>{user.id}</td>
+              <td>{index + 1}</td>
               <td>{user.email}</td>
               <td>{user.fullName}</td>
               <td>{user.phone}</td>
@@ -202,7 +203,6 @@ export default function Products() {
         </tbody>
       </Table>
 
-      {/* Form sửa thông tin người dùng */}
       <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Sửa thông tin người dùng</Modal.Title>
@@ -270,14 +270,13 @@ export default function Products() {
         </Modal.Footer>
       </Modal>
 
-      {/* Modal thêm người dùng */}
       <Modal show={showAddModal} onHide={() => setShowAddModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Thêm người dùng mới</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
-            <Form.Group controlId="formFullName">
+            <Form.Group controlId="formAddFullName">
               <Form.Label>Full Name</Form.Label>
               <Form.Control
                 type="text"
@@ -287,7 +286,7 @@ export default function Products() {
               />
               {errors.fullName && <div className="text-danger">{errors.fullName}</div>}
             </Form.Group>
-            <Form.Group controlId="formEmail">
+            <Form.Group controlId="formAddEmail">
               <Form.Label>Email</Form.Label>
               <Form.Control
                 type="email"
@@ -297,7 +296,7 @@ export default function Products() {
               />
               {errors.email && <div className="text-danger">{errors.email}</div>}
             </Form.Group>
-            <Form.Group controlId="formPassword">
+            <Form.Group controlId="formAddPassword">
               <Form.Label>Password</Form.Label>
               <Form.Control
                 type="password"
@@ -307,7 +306,7 @@ export default function Products() {
               />
               {errors.password && <div className="text-danger">{errors.password}</div>}
             </Form.Group>
-            <Form.Group controlId="formPhone">
+            <Form.Group controlId="formAddPhone">
               <Form.Label>Phone</Form.Label>
               <Form.Control
                 type="text"
@@ -317,7 +316,7 @@ export default function Products() {
               />
               {errors.phone && <div className="text-danger">{errors.phone}</div>}
             </Form.Group>
-            <Form.Group controlId="formBirthday">
+            <Form.Group controlId="formAddBirthday">
               <Form.Label>Birthday</Form.Label>
               <Form.Control
                 type="date"
@@ -333,7 +332,7 @@ export default function Products() {
             Hủy
           </Button>
           <Button variant="primary" onClick={handleAddUser}>
-            Thêm User
+            Thêm người dùng
           </Button>
         </Modal.Footer>
       </Modal>

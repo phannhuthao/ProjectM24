@@ -2,8 +2,14 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { Button, Container, Navbar, Nav, Form } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBagShopping, faHeart, faDoorClosed, faUser } from '@fortawesome/free-solid-svg-icons';
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../store';
+import { ProductType } from '../../confirg/interface';
+import { fetchAllWishList } from '../../store/slice/wishlistSlice';
+import { fetchAllProduct } from '../../store/slice/productSlice';
+
 
 
 interface Product {
@@ -22,25 +28,30 @@ export const formatVND = new Intl.NumberFormat('vi-VN', {
 });
 
 const Wishlist = () => {
-  const [wishlist, setWishList] = React.useState<Product[]>([]);
+  const {wishlist} = useSelector((state: RootState) => state.wishlist); 
+  const {products} = useSelector((state: RootState) => state.product); 
+  const {userLogin} = useSelector((state: RootState) => state.user); 
 
-  React.useEffect(() => {
-    const storedWishList = JSON.parse(localStorage.getItem('wishlist') || '[]');
-    setWishList(storedWishList);
-  }, []);
+  const dispatch = useDispatch();
+console.log(wishlist);
 
-  const handleDeleteOneProduct = (id: string) => {
-    setWishList((prevWishList) => {
-      const updatedWishList = prevWishList.filter((product) => product.id !== id);
-      localStorage.setItem('wishlist', JSON.stringify(updatedWishList));
-      return updatedWishList;
-    });
+  const list  = useMemo(()=>{
+    return wishlist.map(item=>products.find(p=>p.id==item)) 
+  },[wishlist,products])
+console.log(list);
+
+
+  const handleDeleteOneProduct = (id: number) => {
+   
   };
 
   const handleDeleteAll = () => {
-    setWishList([]);
-    localStorage.removeItem('wishlist');
+   
   };
+  useEffect(()=>{
+    dispatch(fetchAllWishList(userLogin?.id))
+    dispatch(fetchAllProduct())
+  },[])
 
   return (
     <div className="d-flex flex-column min-vh-100">
@@ -97,7 +108,7 @@ const Wishlist = () => {
           {wishlist.length === 0 ? (
             <p>No items in wishlist</p>
           ) : (
-            wishlist.map((item) => (
+            list.map((item) => ( item &&
               <div key={item.id} className="col-md-3 mb-4">
                 <div className="card">
                   <img src={item.image} className="card-img-top" alt={item.name} style={{ width: '100%', height: '400px', objectFit: 'cover' }} />

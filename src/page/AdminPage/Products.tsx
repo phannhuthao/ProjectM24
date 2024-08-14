@@ -17,6 +17,10 @@ export default function Products() {
     const [sortOrder, setSortOrder] = useState<string>('');
     const [searchQuery, setSearchQuery] = useState<string>('');
 
+    // Phân trang
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10; 
+
     useEffect(() => {
         dispatch(fetchAllProduct());
     }, [dispatch]);
@@ -47,7 +51,7 @@ export default function Products() {
         setSearchQuery(event.target.value.toLowerCase());
     };
 
-    // Filter and sort products
+    // Sắp xếp theo A - Z , Z - A
     const filteredProducts = products.filter(p =>
         p.name.toLowerCase().includes(searchQuery)
     );
@@ -60,6 +64,15 @@ export default function Products() {
         }
         return 0;
     });
+
+    // Phân trang
+    const totalPages = Math.ceil(sortedProducts.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const currentProducts = sortedProducts.slice(startIndex, startIndex + itemsPerPage);
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+    };
 
     return (
         <div>
@@ -78,16 +91,15 @@ export default function Products() {
                 </Form>
 
                 <div className="d-flex align-items-center">
-            <label htmlFor="sort-order" className="me-2">Sắp xếp theo giá:</label>
-            <select id="sort-order" onChange={handleSortChange} value={sortOrder} className="me-3">
-                <option value="">Chọn sắp xếp</option>
-                <option value="ascending">Giá: Thấp đến Cao</option>
-                <option value="descending">Giá: Cao đến Thấp</option>
-            </select>
+                    <label htmlFor="sort-order" className="me-2">Sắp xếp theo giá:</label>
+                    <select id="sort-order" onChange={handleSortChange} value={sortOrder} className="me-3">
+                        <option value="">Chọn sắp xếp</option>
+                        <option value="ascending">Giá: Thấp đến Cao</option>
+                        <option value="descending">Giá: Cao đến Thấp</option>
+                    </select>
 
-
-                <Button variant="primary" className="me-2" onClick={() => setShowAddModal(true)}>Add Product</Button>
-            </div>
+                    <Button variant="primary" className="me-2" onClick={() => setShowAddModal(true)}>Add Product</Button>
+                </div>
             </div>
 
             <Table striped bordered hover>
@@ -102,9 +114,9 @@ export default function Products() {
                     </tr>
                 </thead>
                 <tbody>
-                    {sortedProducts.map((p: ProductType, index: number) => (
+                    {currentProducts.map((p: ProductType, index: number) => (
                         <tr key={p.id}>
-                            <td>{index + 1}</td>
+                            <td>{startIndex + index + 1}</td>
                             <td>{p.name}</td>
                             <td>
                                 <img src={p.image} alt={p.name} style={{ width: "50px", height: "50px", objectFit: "cover" }} />
@@ -121,6 +133,34 @@ export default function Products() {
                     ))}
                 </tbody>
             </Table>
+
+            {/* Bảng điều khiển phân trang */}
+            <div className="d-flex justify-content-center mt-3">
+                <Button 
+                    variant="secondary" 
+                    onClick={() => handlePageChange(currentPage - 1)} 
+                    disabled={currentPage === 1}
+                >
+                    Previous
+                </Button>
+                {Array.from({ length: totalPages }, (_, index) => (
+                    <Button 
+                        key={index + 1} 
+                        variant={index + 1 === currentPage ? "primary" : "secondary"} 
+                        className="mx-1" 
+                        onClick={() => handlePageChange(index + 1)}
+                    >
+                        {index + 1}
+                    </Button>
+                ))}
+                <Button 
+                    variant="secondary" 
+                    onClick={() => handlePageChange(currentPage + 1)} 
+                    disabled={currentPage === totalPages}
+                >
+                    Next
+                </Button>
+            </div>
 
             {selectedProduct && (
                 <EditProductModal

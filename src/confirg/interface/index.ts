@@ -10,7 +10,8 @@ export type UserType = {
     "status": boolean,
     "id": number,
     "role": string
-    "cart": CartItem[]
+    "cart": CartItem[],
+    "wishlist": number[]
 }
 
 

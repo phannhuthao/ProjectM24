@@ -12,7 +12,7 @@ const ProfileUser = () => {
   const { userInfo, isLoading, error } = useSelector((state: RootState) => state.user);
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
+    fullName: '',
     email: '',
     password: '',
     phone: '',
@@ -26,7 +26,7 @@ const ProfileUser = () => {
   useEffect(() => {
     if (userInfo) {
       setFormData({
-        name: userInfo.fullName || '',
+        fullName: userInfo.fullName || '',
         email: userInfo.email || '',
         password: '', // Keep password empty initially
         phone: userInfo.phone || '',
@@ -136,8 +136,8 @@ const ProfileUser = () => {
                 <Form.Label>Name</Form.Label>
                 <Form.Control
                   type="text"
-                  name="name"
-                  value={formData.name}
+                  name="fullName"
+                  value={formData.fullName}
                   onChange={handleChange}
                 />
               </Form.Group>
